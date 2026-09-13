@@ -1,4 +1,3 @@
-#include "../../custom_header_files/C_headers/charVectar.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -6,22 +5,19 @@ typedef struct Node Node;
 
 struct Node {
 
-    char  *value;
-    int    weight;
-    Node  *left, *right;
+    char *value;
+    int   weight;
+    Node *left, *right;
 };
 
-int is_present(vectar *vec, int size, char target);
-void process_input(char* input, int size);
 
+int is_present(char *input, int index) {
 
-int is_present(vectar *vec, int size, char target) {
+    int  i      = 0;
+    char target = input[index];
+    while (i < index) {
 
-    char* arr = vec -> data;
-    int i = 0;
-    while (i < size) {
-
-        if (target == arr[i])
+        if (input[i] == input[index])
             return 1;
 
         i++;
@@ -29,38 +25,63 @@ int is_present(vectar *vec, int size, char target) {
     return 0;
 }
 
-void process_input(char *input, int size) {
 
-    vectar *char_lit, *count_lit;
-    int     i, vec_length;
+int get_unique_values(char *input) {
 
-    i = vec_length = 0;
-    while (i < size) {
+    int   i, result;
+    char *string;
 
-        _Bool duplicate = is_present(char_lit, vec_length, input[i]);
+    result = i = 0;
+    string = input;
+    while (input[i] != '\0') {
 
-        if (duplicate) {
+        if (input[i] == input[i + 1])
             i++;
-            continue;
-        }
 
+        else if (is_present(string, i)) 
+             result++;
         i++;
     }
+    return result;
 }
 
-int main(void) {
+
+char *get_unique_value_arr(char *input) {
+
+    int size;
+    char *arr;
+    size = get_unique_values(input);
+    arr = malloc(size + 1);
+    arr[size] = '\0';
+}
+
+
+char *file_process(void) {
 
     int   size;
-    char* input;
+    char *input;
 
-    FILE* ptr = fopen("normal", "r");
+    FILE *ptr = fopen("normal", "r");
     fseek(ptr, 0L, SEEK_END);
     size = ftell(ptr);
     fseek(ptr, 0L, SEEK_SET);
-    input       = malloc(size + 1);
+    input = malloc(size + 1);
+    fread(input, 1, size, ptr);
     input[size] = '\0';
-    process_input(input, size);
-    free(input);
 
+    return input;
+}
+
+
+int main(void) {
+
+    char *input;
+    char *arr;
+
+    input = file_process();
+    arr   = get_unique_value_arr(input);
+
+    free(input);
+    free(arr);
     return 0;
 }
