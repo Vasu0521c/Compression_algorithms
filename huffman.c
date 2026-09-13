@@ -10,14 +10,13 @@ struct Node {
     Node *left, *right;
 };
 
-
 int is_present(char *input, int index) {
 
     int  i      = 0;
     char target = input[index];
     while (i < index) {
 
-        if (input[i] == input[index])
+        if (input[i] == target)
             return 1;
 
         i++;
@@ -25,36 +24,34 @@ int is_present(char *input, int index) {
     return 0;
 }
 
-
 int get_unique_values(char *input) {
 
     int   i, result;
     char *string;
 
     result = i = 0;
-    string = input;
+    string     = input;
     while (input[i] != '\0') {
 
         if (input[i] == input[i + 1])
             i++;
 
-        else if (is_present(string, i)) 
-             result++;
+        else if (is_present(string, i))
+            result++;
         i++;
     }
     return result;
 }
 
-
 char *get_unique_value_arr(char *input) {
 
-    int size;
+    int   size;
     char *arr;
-    size = get_unique_values(input);
-    arr = malloc(size + 1);
+    size      = get_unique_values(input);
+    arr       = malloc(size + 1);
     arr[size] = '\0';
+    return arr;
 }
-
 
 char *file_process(void) {
 
@@ -71,7 +68,6 @@ char *file_process(void) {
 
     return input;
 }
-
 
 int main(void) {
 
