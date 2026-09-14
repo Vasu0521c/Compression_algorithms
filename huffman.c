@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define arr_size 255
 
@@ -12,39 +13,43 @@ struct Node {
     Node *left, *right;
 };
 
-int is_present_arr(char *arr, char target, int length) {
-
+int get_value(char *arr, char target) {
+    
     int i = 0;
-    while (i < length) {
+    while (arr[i] != '\0') {
         if (arr[i] == target)
-            return 1;
+            return i;
         i++;
     }
-    return 0;
+    return -1;
 }
 
-void store_unique(char *arr, char *input) {
+void get_unique_vals(char* input, int *vals, char *chars) {
 
-    int i      = 0;
-    int length = 0;
+    int index, length;
+    length = 0;
     while (*input != '\0') {
+        index = get_value(chars, *input);
 
-        if (is_present_arr(arr, *input, length)) {
-            input++;
-            continue;
+        if (index == -1) {
+            chars[length] = *input;
+            vals[length]++;
+            length++;
         }
 
-        arr[i] = *input;
-        length++;
+        else {
+            vals[index]++;
+        }
         input++;
     }
 }
 
-int get_unique(char *input) {
+int get_unique_size(char *input) {
 
     int   result  = 0;
     char *arr     = malloc(arr_size + 1);
     arr[arr_size] = '\0';
+
     while (*input != '\0') {
 
         if (arr[*input] == 0) {
@@ -54,18 +59,9 @@ int get_unique(char *input) {
 
         input++;
     }
+
+    free(arr);
     return result;
-}
-
-char *get_unique_value_arr(char *input) {
-
-    char *arr;
-    int   size;
-    size      = get_unique(input);
-    arr       = malloc(size + 1);
-    arr[size] = '\0';
-    store_unique(arr, input);
-    return arr;
 }
 
 char *file_process(void) {
@@ -81,19 +77,25 @@ char *file_process(void) {
     fread(input, 1, size, ptr);
     input[size] = '\0';
 
-    return input
+    return input;
 }
 
 int main(void) {
 
     int   size;
-    char *input;
-    char *arr;
+    char *input, *chars;
+    int  *vals;
 
-    input = file_process();
-    arr   = get_unique_value_arr(input);
+    input       = file_process();
+    size        = get_unique_size(input);
+    vals        = malloc(size);
+    chars       = malloc(size + 1);
+    memset(vals, 0, size);
+    memset(chars, '\0', size);
+    chars[size] = '\0';
+
+    get_unique_vals(input, vals, chars);
 
     free(input);
-    free(arr);
     return 0;
 }
