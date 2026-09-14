@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define arr_size 255
+
 typedef struct Node Node;
 
 struct Node {
@@ -10,46 +12,59 @@ struct Node {
     Node *left, *right;
 };
 
-int is_present(char *input, int index) {
+int is_present_arr(char *arr, char target, int length) {
 
-    int  i      = 0;
-    char target = input[index];
-    while (i < index) {
-
-        if (input[i] == target)
+    int i = 0;
+    while (i < length) {
+        if (arr[i] == target)
             return 1;
-
         i++;
     }
     return 0;
 }
 
-int get_unique_values(char *input) {
+void store_unique(char *arr, char *input) {
 
-    int   i, result;
-    char *string;
+    int i      = 0;
+    int length = 0;
+    while (*input != '\0') {
 
-    result = i = 0;
-    string     = input;
-    while (input[i] != '\0') {
+        if (is_present_arr(arr, *input, length)) {
+            input++;
+            continue;
+        }
 
-        if (input[i] == input[i + 1])
-            i++;
+        arr[i] = *input;
+        length++;
+        input++;
+    }
+}
 
-        else if (is_present(string, i))
+int get_unique(char *input) {
+
+    int   result  = 0;
+    char *arr     = malloc(arr_size + 1);
+    arr[arr_size] = '\0';
+    while (*input != '\0') {
+
+        if (arr[*input] == 0) {
             result++;
-        i++;
+            arr[*input]++;
+        }
+
+        input++;
     }
     return result;
 }
 
 char *get_unique_value_arr(char *input) {
 
-    int   size;
     char *arr;
-    size      = get_unique_values(input);
+    int   size;
+    size      = get_unique(input);
     arr       = malloc(size + 1);
     arr[size] = '\0';
+    store_unique(arr, input);
     return arr;
 }
 
@@ -66,11 +81,12 @@ char *file_process(void) {
     fread(input, 1, size, ptr);
     input[size] = '\0';
 
-    return input;
+    return input
 }
 
 int main(void) {
 
+    int   size;
     char *input;
     char *arr;
 
