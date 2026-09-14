@@ -13,12 +13,46 @@ struct Node {
     Node *left, *right;
 };
 
+
+void get_min_vals(int *result, int *arr, int size) {
+
+    int i, j, skip, low;
+    i = 0;
+    j = 0;
+    skip = -1;
+
+    while (i < size - 1) {
+
+        if (i == skip) {
+            i++;
+            continue;
+        }
+
+        if (arr[i] < arr[i + 1]) {
+            low = i;
+            skip = i;
+        }
+
+        if (i == size - 1) {
+            result[j]  = low;
+            j++;
+            if (j > 1)
+                break;
+            i = 0;
+        }
+        i++;
+    }
+}
+
 int get_value(char *arr, char target) {
     
     int i = 0;
+
     while (arr[i] != '\0') {
+
         if (arr[i] == target)
             return i;
+
         i++;
     }
     return -1;
@@ -28,6 +62,7 @@ void get_unique_vals(char* input, int *vals, char *chars) {
 
     int index, length;
     length = 0;
+
     while (*input != '\0') {
         index = get_value(chars, *input);
 
@@ -85,10 +120,12 @@ int main(void) {
     int   size;
     char *input, *chars;
     int  *vals;
+    int *min;
 
     input       = file_process();
     size        = get_unique_size(input);
-    vals        = malloc(size);
+    min         = malloc(sizeof(int) * 2);
+    vals        = malloc(sizeof(int) * size);
     chars       = malloc(size + 1);
     memset(vals, 0, size);
     memset(chars, '\0', size);
