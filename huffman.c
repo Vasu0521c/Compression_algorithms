@@ -11,7 +11,15 @@ struct Node {
     char  value;
     int   l_val, r_val;
     Node *left, *right;
+    
 };
+
+typedef struct {
+
+    int *vals, *min;
+    char *chrs;
+
+} params;
 
 Node *new_node(void) {
 
@@ -24,23 +32,37 @@ Node *new_node(void) {
     return newnode;
 }
 
-Node* assing_children(int *arr, Node *root) {
+Node *create_children(Node *left, Node *right) {
 
-    Node *temp    = root;
-    temp -> left  = new_node();
-    temp -> right = new_node();
-    temp -> l_val = 0;
-    temp -> r_val = 1;
-    temp -> left -> value  = arr[0];
-    temp -> right -> value = arr[1];
+    Node *root    = new_node();
+    root -> l_val = 0;
+    root -> r_val = 1;
+
+    if (left == NULL)
+        root -> left  = new_node();
+    else
+        root -> left  = left;
+
+    if (right == NULL)
+        root -> right = new_node();
+    else
+        root -> right = right;
+
+    return root;
+}
+
+Node *assign_vals(Node *root, char lv, char rv) {
+
+    Node *temp = root;
+    temp->left->value = lv;
+    temp->right->value = rv;
     return root;
 }
 
 void get_min_vals(int *result, int *arr, int size) {
 
     int i, j, skip, low;
-    i    = 0;
-    j    = 0;
+    i = j = 0;
     skip = -1;
 
     while (i < size - 1) {
@@ -80,10 +102,15 @@ int get_value(char *arr, char target) {
     return -1;
 }
 
-void get_unique_vals(char *input, int *vals, char *chars) {
+void get_unique_vals(char *input, params *pars) {
 
     int index, length;
+    char *chars;
+    int  *vals;
+
     length = 0;
+    chars = pars -> chrs;
+    vals  = pars -> vals;
 
     while (*input != '\0') {
         index = get_value(chars, *input);
@@ -137,27 +164,63 @@ char *file_process(void) {
     return input;
 }
 
+
+void construct_tree(Node **nods, params *pars, int size) {
+
+    Node *left, *right;
+    int i, vl_counter;
+    int low_a, low_b;
+    vl_counter = i = 0;
+
+    while (vl_counter != size - 1) {
+        get_min_vals(pars -> min, pars -> vals, size);
+        low_a = pars -> min[0];
+        low_b = pars -> min[1];
+
+        if (nods[low_a] == NULL) {
+            left = NULL;
+        }
+
+        if (nods[low_b] == NULL) {
+            right = NULL;
+        }
+
+        nods[low_a] = create_children(left, right);
+        nods[low_a] = nods[low_b];
+    }
+}
+
 int main(void) {
 
-    int   size;
-    char *input, *chars;
-    int  *vals;
-    int  *min;
+    params *pars;
+    char *input;
+    Node *root;
+    Node **nods;
+    int size;
 
     input = file_process();
     size  = get_unique_size(input);
-    min   = malloc(sizeof(int) * 2);
-    vals  = malloc(sizeof(int) * size);
-    chars = malloc(size + 1);
-    memset(vals, 0, size);
-    memset(chars, '\0', size);
-    chars[size] = '\0';
 
-    get_unique_vals(input, vals, chars);
+    nods  = malloc(size * sizeof(Node *));
+    pars  = malloc(sizeof(params));
+
+    pars -> min   = malloc(sizeof(int) * 2);
+    pars -> vals  = malloc(sizeof(int) * size);
+    pars -> chrs  = malloc(size + 1);
+
+    memset(pars -> vals, 0, size * sizeof(int));
+    memset(pars -> chrs, 0, size * sizeof(int));
+    memset(nods, 0, size * sizeof(Node *));
+    pars -> chrs[size] = '\0';
+
+    root = new_node();
+    get_unique_vals(input, pars);
+    construct_tree(nods, pars, size);
 
     free(input);
-    free(chars);
-    free(vals);
-    free(min);
+    free(nods);
+    free(pars -> chrs);
+    free(pars -> vals);
+    free(pars -> min);
     return 0;
 }
