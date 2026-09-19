@@ -16,13 +16,6 @@ struct Node {
     Node *left, *right, *parent;
 };
 
-typedef struct {
-
-    int  *vals, *min;
-    char *chrs, **path;
-
-} params;
-
 //===========================================//
 
 Node *new_node(void) {
@@ -180,24 +173,6 @@ char *file_process(void) {
     return input;
 }
 
-void set_memory(char ***dict, Node ***nods, params **pars, int size) {
-
-    *dict = malloc(size * sizeof(char *));
-    *nods = malloc(size * sizeof(Node *));
-    *pars = malloc(sizeof(params));
-
-    (*pars)->min  = malloc(sizeof(int) * 2);
-    (*pars)->vals = malloc(sizeof(int) * size);
-    (*pars)->chrs = malloc(sizeof(char) * size + 1);
-    (*pars)->path = malloc(sizeof(char *) * size);
-
-    memset(*nods, 0, size * sizeof(Node *));
-    memset(*dict, 0, size * sizeof(char *));
-    memset((*pars)->min, 0, 2 * sizeof(int));
-    memset((*pars)->vals, 0, size * sizeof(int));
-    memset((*pars)->chrs, 0, size * sizeof(char));
-    (*pars)->chrs[size] = '\0';
-}
 
 int get_value(char *arr, char target) {
 
@@ -320,27 +295,6 @@ void get_dictonary(params *pars, Node *root, int size) {
     }
 }
 
-void free_memory(char **input, params **pars, char ***dict, Node ***nods,
-                 int size) {
-
-    int i = 1;
-
-    while (i < size) {
-        free(*dict[i]);
-        free(*nods[i]);
-        free((*pars)->path[i]);
-        i++;
-    }
-
-    free(*dict);
-    free(*nods);
-    free((*pars)->vals);
-    free((*pars)->min);
-    free((*pars)->chrs);
-    free((*pars)->path);
-    free(pars);
-    free(input);
-}
 
 void get_full_byte(char *path) {
 
@@ -372,20 +326,14 @@ int main(void) {
 
     params *pars;
     char   *input;
-    char  **dict;
-    Node   *root;
-    Node  **nods;
+    char   *char_vec; 
+    int    *int_vec;
     int     size;
 
     input = file_process();
     size  = get_unique_size(input);
+    int_vec = vector_create();
+    char_vec = vector_create();
 
-    set_memory(&dict, &nods, &pars, size);
-    get_unique_vals(input, pars);
-    root = construct_tree(root, nods, pars, size);
-    get_dictonary(pars, root, size);
-    /* write_data(input, pars, size); */
-
-    free_memory(&input, &pars, &dict, &nods, size);
     return 0;
 }
