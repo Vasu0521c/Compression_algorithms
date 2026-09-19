@@ -1,3 +1,4 @@
+#include "../../custom_header_files/Donwloaded_ones/vec.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,9 +32,7 @@ Node *new_node(void) {
     if (node == NULL)
         exit(1);
 
-    node->length = 0;
-    node->l_val  = 0;
-    node->r_val  = 0;
+    memset(node, 0, sizeof(Node));
     node->left   = NULL;
     node->right  = NULL;
     node->parent = NULL;
@@ -89,7 +88,7 @@ Node *assign_values(Node *root, char *l_val, char *r_val) {
     root->value  = malloc(root->length + 1);
     memcpy(root->value, temp_l->value, temp_l->length);
     memcpy(root->value + (temp_l->length), temp_r->value, temp_r->length);
-    root -> value[root -> length] = '\0';
+    root->value[root->length] = '\0';
     return root;
 }
 
@@ -271,10 +270,10 @@ Node *construct_tree(Node *root, Node **nods, params *pars, int size) {
 
 char *get_path(Node *curr, char target, int size) {
 
-    int i, dummy;
+    int   i, dummy;
     char *path = malloc(size + 1);
     path[size] = '\0';
-    i = 0;
+    i          = 0;
 
     while (curr != NULL) {
 
@@ -285,24 +284,25 @@ char *get_path(Node *curr, char target, int size) {
         dummy = 0;
 
         if (curr->left != NULL) {
-            dummy = (is_present(curr -> left, target));
-        } else if (curr->right != NULL && dummy == 0) {
-            dummy = (is_present(curr -> right, target));
-        }
-
-        switch (dummy) {
-            case 0 :
-                path[i] = '0' + curr->r_val;
-                curr    = curr->right;
-                i++;
-                continue;
-            case 1 :
+            if (is_present(curr->left, target)) {
                 path[i] = '0' + curr->l_val;
                 curr    = curr->left;
                 i++;
                 continue;
+            }
         }
+
+        if (curr->right != NULL) {
+            if (is_present(curr->right, target)) {
+                path[i] = '0' + curr->r_val;
+                curr    = curr->right;
+                i++;
+                continue;
+            }
+        }
+        break;
     }
+
     path[i] = '\0';
     return path;
 }
@@ -315,7 +315,7 @@ void get_dictonary(params *pars, Node *root, int size) {
     i    = 0;
     while (i < size) {
         pars->path[i] = get_path(curr, pars->chrs[i], size);
-        printf("%s\n", pars -> path[i]);
+        printf("%s\n", pars->path[i]);
         i++;
     }
 }
@@ -323,7 +323,7 @@ void get_dictonary(params *pars, Node *root, int size) {
 void free_memory(char **input, params **pars, char ***dict, Node ***nods,
                  int size) {
 
-    int i = 0;
+    int i = 1;
 
     while (i < size) {
         free(*dict[i]);
@@ -351,7 +351,6 @@ void get_full_byte(char *path) {
         i++;
     }
 }
-
 
 void write_data(char *input, params *pars, int size) {
 
