@@ -180,7 +180,7 @@ int get_value(char *arr, char target) {
 
     while (arr[i] != '\0') {
 
-        if (arr[i] == target)
+        if (target == arr[i])
             return i;
 
         i++;
@@ -188,13 +188,13 @@ int get_value(char *arr, char target) {
     return -1;
 }
 
-void get_unique_vals(char *input, params *pars) {
+void get_unique_vals(char *input, int *int_v, char *char_v) {
 
     int index, length;
     length = 0;
 
     while (*input != '\0') {
-        index = get_value(pars->chrs, *input);
+        index = get_value(char_v, *input);
 
         if (index == -1) {
             pars->chrs[length] = *input;
@@ -324,7 +324,6 @@ void write_data(char *input, params *pars, int size) {
 
 int main(void) {
 
-    params *pars;
     char   *input;
     char   *char_vec; 
     int    *int_vec;
@@ -334,6 +333,8 @@ int main(void) {
     size  = get_unique_size(input);
     int_vec = vector_create();
     char_vec = vector_create();
+    get_unique_vals(input, int_vec, char_vec);
+
 
     return 0;
 }
