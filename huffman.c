@@ -1,4 +1,3 @@
-#include "../../custom_header_files/Donwloaded_ones/vec.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,8 +10,8 @@ typedef struct Node Node;
 
 struct Node {
 
-    char *value;
-    int   l_val, r_val, length;
+    unsigned char val;
+    int   l_val, r_val;
     Node *left, *right, *parent;
 };
 
