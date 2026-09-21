@@ -27,6 +27,7 @@ struct Node {
     Node  *left, *right, *parent;
 };
 
+<<<<<<< HEAD
 typedef struct {
 
     u_char *chrs;
@@ -37,6 +38,9 @@ typedef struct {
 //===========================================
 // Forward declaratoins
 // ==========================================
+=======
+//===========================================//
+>>>>>>> switcheble
 
 // Memory allocation and Free functions
 
@@ -180,13 +184,18 @@ int get_min_vals(int *arr, int val, int size) {
     return low;
 }
 
+<<<<<<< HEAD
 int get_value(u_char *arr, u_char target, int size) {
+=======
+
+int get_value(char *arr, char target) {
+>>>>>>> switcheble
 
     int i = 0;
 
     while (i < size) {
 
-        if (arr[i] == target)
+        if (target == arr[i])
             return i;
 
         i++;
@@ -194,13 +203,21 @@ int get_value(u_char *arr, u_char target, int size) {
     return -1;
 }
 
+<<<<<<< HEAD
 void get_unique_vals(u_char *input, params *pars) {
+=======
+void get_unique_vals(char *input, int *int_v, char *char_v) {
+>>>>>>> switcheble
 
     int index, length;
     length = 0;
 
     while (*input != '\0') {
+<<<<<<< HEAD
         index = get_value(pars -> chrs, *input, length);
+=======
+        index = get_value(char_v, *input);
+>>>>>>> switcheble
 
         if (index == -1) {
             pars -> chrs[length] = *input;
@@ -340,10 +357,27 @@ void get_dictionary(u_char *chrs, Node *root, u_char **path, int size) {
 
     curr = root;
     i    = 0;
+<<<<<<< HEAD
 
     while (i < size) {
         path[i] = get_path(curr, chrs[i], path[i]);
         printf("%c\t%s\n", chrs[i], path[i]);
+=======
+    while (i < size) {
+        pars->path[i] = get_path(curr, pars->chrs[i], size);
+        printf("%s\n", pars->path[i]);
+        i++;
+    }
+}
+
+
+void get_full_byte(char *path) {
+
+    int           i = 0;
+    unsigned char x = 0;
+    while (i < 8 && path[i] != '\0') {
+        x = (x << 1) | ('0' - path[i]);
+>>>>>>> switcheble
         i++;
     }
 }
@@ -354,14 +388,24 @@ void get_dictionary(u_char *chrs, Node *root, u_char **path, int size) {
 
 int main(void) {
 
+<<<<<<< HEAD
     params *pars;
     u_char *input, **path;
     Node   *root, **nodes;
+=======
+    char   *input;
+    char   *char_vec; 
+    int    *int_vec;
+>>>>>>> switcheble
     int     size;
 
     input = file_process();
     size  = get_unique_size(input);
+    int_vec = vector_create();
+    char_vec = vector_create();
+    get_unique_vals(input, int_vec, char_vec);
 
+<<<<<<< HEAD
     memory_allocator(&pars, &path, &nodes, size);
     get_unique_vals(input, pars);
     root = construct_tree(nodes, pars, size);
@@ -369,5 +413,8 @@ int main(void) {
 
     free_memory(&pars, &path, &nodes, size);
     free_tree(root);
+=======
+
+>>>>>>> switcheble
     return 0;
 }
