@@ -1,6 +1,13 @@
+//================================================//
+// Header Files
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+// ==============================================//
+ 
+// Macros, Constants and Typedefs
 
 #define ARR_SIZE 255
 #define MAX_VAL  10000000
@@ -10,14 +17,51 @@ typedef unsigned char u_char;
 
 //==============================================//
 
+// Structures
+
 struct Node {
 
-    u_char val;
+    u_char chr;
     int    freq;
     Node  *left, *right, *parent;
 };
 
+
+typedef struct {
+
+    u_char *chrs;
+    int    *vals, *min;
+
+} params;
+
 //===========================================//
+
+// Forward declaratoins
+
+// ------------------------------------..
+// Node operations
+
+Node *new_node(void);
+Node *node_assign(Node *node, int val, char chr);
+Node *create_subtree(Node *left, Node *right, params *pars);
+Node *construct_tree(Node **nods, params *pars, int size);
+Node *find_node(Node *root, char target);
+void  set_nodes_null(Node **nodes, int size);
+
+u_char *file_process(void);
+
+int    get_min_vals(int *arr, int val, int size);
+
+// ---------------------------------//
+
+// Memory allocation and Free functions
+
+void memory_allocator(params **pars, u_char ***path, Node ***nodes, int size);
+void free_memory(params **pars, u_char ***path, Node ***nodes, int size);
+
+//==========================================//
+
+// Node and Tree Functions 
 
 Node *new_node(void) {
 
@@ -34,256 +78,82 @@ Node *new_node(void) {
 }
 
 
-Node *create_children(Node *left, Node *right) {
+Node *node_assign(Node *node, int val, char chr) {
 
-    Node *root = new_node();
+    if (node == NULL) {
+        node       = new_node();
+        node -> chr  = chr;
+        node -> freq = val;
+    }
 
-    if (left == NULL)
-        root -> left = new_node();
-    else
-        root -> left = left;
+    return node;
+}
 
-    if (right == NULL)
-        root -> right = new_node();
-    else
-        root -> right = right;
 
-    root -> right -> parent = root;
-    root -> left -> parent  = root;
+Node *create_subtree(Node *left, Node *right, params *pars) {
+
+    int  *min;
+    Node *root;
+
+    min   = pars -> min;
+    root  = new_node();
+    left  = node_assign(left, pars -> vals[min[0]], pars -> chrs[min[0]]);
+    right = node_assign(right, pars -> vals[min[1]], pars -> chrs[min[1]]);
+
+    root -> left    = left;
+    root -> right   = right;
+    left -> parent  = root;
+    right -> parent = root;
+    root -> freq    = left -> freq + right -> freq;
     return root;
 }
 
 
-void get_min_vals(int *result, int *arr, int size) {
-
-    int i, j, skip, low;
-
-    low = i = j = 0;
-    skip = -1;
-
-    while (i < size) {
-
-        if (i == skip) {
-            i++;
-            if (i < size) {
-                continue;
-            }
-        }
-
-        if (i >= size - 1) {
-            result[j] = low;
-            skip      = low;
-            j++;
-            if (j > 1)
-                break;
-            low = 0;
-            i   = 0;
-        }
-
-        if (arr[low] >= arr[i]) {
-            low = i;
-        }
-
-        i++;
-    }
-}
-
-
-int get_unique_size(char *input) {
-
-    int result;
-    char arr[ARR_SIZE + 1] = {0};
-
-    arr[ARR_SIZE] = '\0';
-    result = 0;
-
-    while (*input != '\0') {
-
-        if (arr[*input] == 0) {
-            result++;
-            arr[*input]++;
-        }
-
-        input++;
-    }
-
-    return result;
-}
-
-
-char *file_process(void) {
-
-    int   size;
-    char *input;
-
-    FILE *ptr = fopen("normal", "r");
-
-    if (ptr == NULL)
-        exit(1);
-
-    fseek(ptr, 0L, SEEK_END);
-    size = ftell(ptr);
-    fseek(ptr, 0L, SEEK_SET);
-    input = malloc(size + 1);
-    fread(input, 1, size, ptr);
-    input[size] = '\0';
-
-    return input;
-}
-
-
-int get_value(char *arr, char target) {
-
-    int i = 0;
-
-    while (arr[i] != '\0') {
-
-        if (arr[i] == target)
-            return i;
-
-        i++;
-    }
-    return -1;
-}
-
-
-void get_unique_vals(char *input, int *vals, char *chrs) {
-
-    int index, length;
-    length = 0;
-
-    while (*input != '\0') {
-        index = get_value(chrs, *input);
-
-        if (index == -1) {
-            chrs[length] = *input;
-            vals[length]++;
-            length++;
-        }
-
-        else {
-            vals[index]++;
-        }
-
-        input++;
-    }
-}
-
-
-Node *construct_tree(Node **nods, int *vals, char *chrs, int size) {
+Node *construct_tree(Node **nods, params *pars, int size) {
 
     Node *left, *right, *root;
-    int   vl_counter, low_a, low_b;
-    int   min[2] = {0};
+    int   counter, low_a, low_b;
 
-    vl_counter = 0;
+    pars -> min = malloc(2 * sizeof(int));
+    counter = 0;
 
-    while (vl_counter != size - 1) {
+    while (counter != size - 1) {
 
-        get_min_vals(min, vals, size);
-
-        low_a = min[0];
-        low_b = min[1];
+        pars -> min[0] = low_a = get_min_vals(pars -> vals, MAX_VAL, size);
+        pars -> min[1] = low_b = get_min_vals(pars -> vals, low_a, size);
 
         left  = (nods[low_a] != 0) ? nods[low_a] : NULL;
         right = (nods[low_b] != 0) ? nods[low_b] : NULL;
-        root = create_children(left, right);
-
-        root->left->val  = chrs[low_a];
-        root->right->val = chrs[low_b];
+        root  = create_subtree(left, right, pars);
 
         nods[low_a] = root;
         nods[low_b] = NULL;
 
-        vals[low_a] = vals[low_a] + vals[low_b];
-        vals[low_b] = MAX_VAL;
+        pars -> vals[low_a] = pars -> vals[low_a] + pars -> vals[low_b];
+        pars -> vals[low_b] = MAX_VAL;
 
-        vl_counter++;
+        counter++;
     }
 
+    free(pars -> min);
     return root;
 }
 
-
-char *get_path(Node *curr, char target, int size) {
-
-    int   i, dummy;
-    char *path;
-
-    path = malloc(size + 1);
-    i   = 0;
-
-    while (curr != NULL) {
-
-        if (curr -> val == target) {
-            path[i] = '\0';
-            return path;
-        }
-
-        dummy = 0;
-
-        if (curr -> left != NULL) {
-            path[i] = '0';
-            curr    = curr -> left;
-            i++;
-            continue;
-        }
-
-        if (curr -> right != NULL) {
-            path[i] = '1';
-            curr    = curr -> right;
-            i++;
-            continue;
-        }
-        break;
-    }
-
-    path[i] = '\0';
-    return path;
-}
-
-
-void get_dictonary(char *chrs, Node *root, int size) {
+Node *find_node(Node *root, char target) {
 
     Node *curr;
-    int   i;
-    curr = root;
-    i    = 0;
 
-    while (i < size) {
-        path[i] = get_path(curr, chrs[i], size);
-        printf("%s\n", path[i]);
-        i++;
-    }
+    if (root == NULL)
+        return NULL;
 
-}
+    if (root -> chr == target)
+        return root;
 
+    curr = find_node(root -> left, target);
+    if (curr == NULL)
+        curr = find_node(root -> right, target);
 
-void get_full_byte(char *path) {
-
-    int           i = 0;
-    unsigned char x = 0;
-    while (i < 8 && path[i] != '\0') {
-        x = (x << 1) | (path[i] - '0');
-        i++;
-    }
-}
-
-
-void write_data(char *input, params *pars, int size) {
-
-    int   i   = 0;
-    FILE *ptr = fopen("dummy", "wb");
-
-    if (ptr == NULL)
-        exit(1);
-
-    while (i < size) {
-        fwrite(&path[i], 1, 1, ptr);
-        i++;
-    }
-
-    fclose(ptr);
+    return curr;
 }
 
 
@@ -298,24 +168,242 @@ void set_nodes_null(Node **nodes, int size) {
 }
 
 
+u_char *get_path(Node *curr, char target, u_char *path) {
+
+    int     i;
+    u_char *tem;
+    Node   *temp, *dummy;
+
+    temp = curr;
+    i    = 0;
+    tem  = path;
+    temp = find_node(curr, target);
+
+    while (temp != curr) {
+        dummy = temp -> parent;
+
+        if (dummy -> left == temp)
+            tem[i] = '0';
+
+        if (dummy -> right == temp)
+            tem[i] = '1';
+
+        temp = dummy;
+        i++;
+    }
+
+    path[i] = '\0';
+    return path;
+}
+
+int get_min_vals(int *arr, int val, int size) {
+
+    int i, low;
+    low = i = 0;
+
+    if (low == val)
+        low++;
+
+    while (i < size) {
+
+        if (i == val) {
+            i++;
+            continue;
+        }
+
+        if (arr[low] >= arr[i]) {
+            low = i;
+        }
+
+        i++;
+    }
+
+    return low;
+}
+
+void get_dictionary(u_char *chrs, Node *root, u_char **path, int size) {
+
+    Node *curr;
+    int   i;
+
+    curr = root;
+    i    = 0;
+
+    while (i < size) {
+        path[i] = get_path(curr, chrs[i], path[i]);
+        printf("%c\t%s\n", chrs[i], path[i]);
+        i++;
+    }
+}
+
+/* void get_full_byte(u_char *path) { */
+
+/*     int           i = 0; */
+/*     unsigned char x = 0; */
+
+/*     while (i < 8 && path[i] != '\0') { */
+/*         x = (x << 1) | (path[i] - '0'); */
+/*         i++; */
+/*     } */
+/* } */
+
+/* void write_data(u_char *input, int size) { */
+
+/*     int   i   = 0; */
+/*     FILE *ptr = fopen("dummy", "wb"); */
+
+/*     if (ptr == NULL) */
+/*         exit(1); */
+
+/*     while (i < size) { */
+/*         fwrite(&path[i], 1, 1, ptr); */
+/*         i++; */
+/*     } */
+
+/*     fclose(ptr); */
+/* } */
+
+
+void memory_allocator(params **pars,
+                      u_char ***path,
+                      Node ***nodes,
+                      int size) {
+    
+    *pars  = malloc(sizeof(params));
+    *path  = malloc(size * sizeof(u_char *));
+    *nodes = malloc(size * sizeof(Node *));
+
+    (*pars) -> vals = malloc(size * sizeof(int));
+    (*pars) -> chrs = malloc(size + 1);
+    (*pars) -> chrs[size] = '\0';
+
+    for (int i = 0; i < size; i++) {
+        (*path)[i] = malloc(size + 1);
+    }
+
+    memset((*pars) -> vals, 0, size * sizeof(int));
+    set_nodes_null(*nodes, size);
+}
+
+
+void free_memory(params **pars,
+                 u_char ***path,
+                 Node ***nodes,
+                 int size) {
+
+    for (int i = 1; i < size; i++) {
+        free((*nodes)[i]);
+        free((*path)[i]);
+    }
+
+    free((*pars) -> vals);
+    free((*pars) -> chrs);
+    free(pars);
+    free(path);
+    free(nodes);
+}
+
+
 int main(void) {
 
-    char *input, *chrs;
-    Node *root, **nodes;
-    int  *vals;
-    int   size;
+    params *pars;
+    u_char *input, **path;
+    Node   *root, **nodes;
+    int     size;
 
     input = file_process();
     size  = get_unique_size(input);
 
-    nodes      = malloc(size * sizeof(Node *));
-    vals       = malloc(size * sizeof(int));
-    chrs       = malloc(size + 1);
-    chrs[size] = '\0';
-
-    set_nodes_null(nodes, size);
-    get_unique_vals(input, vals, chrs);
-    construct_tree(nodes, vals, chrs, size);
+    memory_allocator(&pars, &path, &nodes, size);
+    get_unique_vals(input, pars);
+    root = construct_tree(nodes, pars, size);
+    get_dictionary(pars -> chrs, root, path, size);
 
     return 0;
+}
+
+
+u_char *file_process(void) {
+
+    int     size;
+    u_char *input;
+
+    FILE   *ptr = fopen("normal", "r");
+
+    if (ptr == NULL)
+        exit(1);
+
+    fseek(ptr, 0L, SEEK_END);
+    size = ftell(ptr);
+
+    while (size == -1)
+        size = ftell(ptr);
+
+    fseek(ptr, 0L, SEEK_SET);
+    input = malloc(size + 1);
+    fread(input, 1, size, ptr);
+    input[size - 1] = '\0';
+
+    fclose(ptr);
+    return input;
+}
+
+
+
+int get_unique_size(u_char *input) {
+
+    int    result;
+    u_char arr[ARR_SIZE + 1] = {0};
+
+    arr[ARR_SIZE] = '\0';
+    result        = 0;
+
+    while (*input != '\0') {
+
+        if (arr[*input] == 0) {
+            result++;
+            arr[*input]++;
+        }
+
+        input++;
+    }
+
+    return result;
+}
+
+int get_value(u_char *arr, u_char target, int size) {
+
+    int i = 0;
+
+    while (i < size) {
+
+        if (arr[i] == target)
+            return i;
+
+        i++;
+    }
+    return -1;
+}
+
+
+void get_unique_vals(u_char *input, params *pars) {
+
+    int index, length;
+    length = 0;
+
+    while (*input != '\0') {
+        index = get_value(pars -> chrs, *input, length);
+
+        if (index == -1) {
+            pars -> chrs[length] = *input;
+            pars -> vals[length]++;
+            length++;
+        }
+
+        else {
+            pars -> vals[index]++;
+        }
+
+        input++;
+    }
 }
