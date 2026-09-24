@@ -60,6 +60,7 @@ int     get_min_vals(int *arr, int val, int size);
 void    get_unique_vals(u_char *input, params *pars);
 int     get_unique_size(u_char *input);
 int     get_value(u_char *arr, u_char target, int size);
+int     get(Node *root);
 
 // =========================================
 // Memory Functions
@@ -251,6 +252,7 @@ int get_path_size(u_char **path, int size) {
 void get_full_bytes(u_char *bytes, u_char *path, int length) {
 
     int i, j, k;
+    u_char answer;
     i = j = k = 0;
 
     while (i < length) {
@@ -365,18 +367,15 @@ Node *find_node(Node *root, char target) {
 u_char *get_path(Node *curr, char target, u_char *path) {
 
     int     i;
-    u_char *tem;
     Node   *temp, *dummy;
 
-    temp = curr;
-    i    = 0;
-    tem  = path;
     temp = find_node(curr, target);
+    i    = 0;
 
     while (temp != curr) {
-        dummy  = temp -> parent;
-        tem[i] = (dummy -> left == temp) ? '0' : '1';
-        temp   = dummy;
+        dummy   = temp -> parent;
+        path[i] = (dummy -> left == temp) ? '0' : '1';
+        temp    = dummy;
         i++;
     }
 
@@ -398,23 +397,40 @@ void reverse_path(u_char *path, int size) {
 
 void get_dictionary(u_char *chrs, Node *root, u_char **path, int size) {
 
-    Node *curr;
-    curr = root;
-
     for (int i = 0; i < size; i++) {
-        path[i] = get_path(curr, chrs[i], path[i]);
-    }
-
-    for (int i = 0; i < size; i++) {
+        path[i] = get_path(root, chrs[i], path[i]);
         reverse_path(path[i], get_size(path[i]));
     }
 }
 
-void get_full_path(u_char *full_p, u_char **path, int size) {
+void recsive_function(Node *arr, u_char *full_p, Node *root) {
+
+    int i,j;
+    i = 0;
+    arr[i] = *root;
+    j = get(root);
+
+    while (i < j) {
+
+        if (arr[i].left != NULL) {
+            arr[i+1] = *(arr[i].left);
+        }
+
+        if (arr[i].right != NULL) {
+            arr[i+2] = *(arr[i].right);
+        }
+
+        i++;
+    }
+}
+
+void get_full_path(u_char *full_p, u_char **path, int size, int tree_size, Node *root) {
 
     int i, j, k;
+    Node arr[size];
     i = j = k = 0;
 
+    recsive_function(arr, full_p, root);
     while (i < size) {
 
         if (path[k][j] == '\0') {
@@ -428,6 +444,21 @@ void get_full_path(u_char *full_p, u_char **path, int size) {
     }
 }
 
+int get(Node *root) {
+
+    int result = 0;
+
+    if (root != NULL)
+        result++;
+    else
+        return result;
+
+    result += get(root -> left);
+    result += get(root -> right);
+
+    return result;
+}
+
 // ============================================
 // Main Function
 // ============================================
@@ -437,7 +468,7 @@ int main(void) {
     params *pars;
     u_char *input, **path, *full_path, *bytes;
     Node   *root, **nodes;
-    int     size_a, size_b, byte_length;
+    int     size_a, size_b, byte_length, tree_size;
 
     input  = file_process();
     size_a = get_unique_size(input);
@@ -448,11 +479,14 @@ int main(void) {
     get_dictionary(pars -> chrs, root, path, size_a);
 
     size_b    = get_path_size(path, size_a);
-    full_path = malloc(size_b);
-    get_full_path(full_path, path, size_b);
+    tree_size    = get(root);
+    tree_size    = tree_size / (int)8 + 1;
+    full_path = malloc(size_b + tree_size);
+    get_full_path(full_path, path, size_b, tree_size, root);
 
-    byte_length = (size_b % (int)8) ? (size_b / (int)8) + 1 : size_b / (int)8;
-    bytes       = malloc(byte_length);
+    byte_length  = (size_b % (int)8) ? (size_b / (int)8) + 1 : size_b / (int)8;
+    byte_length += tree_size + size_a;
+    bytes        = malloc(byte_length);
     memset(bytes, 0, byte_length);
 
     get_full_bytes(bytes, full_path, size_b);
@@ -460,5 +494,7 @@ int main(void) {
 
     free_memory(&pars, &path, &nodes, size_a);
     free_tree(root);
+    free(bytes);
+    free(full_path);
     return 0;
 }
