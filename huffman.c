@@ -2,6 +2,7 @@
 // Header Files
 // ===============================================
 
+#include "../../custom_header_files/downloaded_ones/vec.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -72,16 +73,16 @@ void memory_allocator(params **pars, u_char ***path, Node ***nodes, int size) {
     *path  = malloc(size * sizeof(u_char *));
     *nodes = malloc(size * sizeof(Node *));
 
-    (*pars) -> vals = malloc(size * sizeof(int));
-    (*pars) -> chrs = malloc(size + 1);
+    (*pars)->vals = malloc(size * sizeof(int));
+    (*pars)->chrs = malloc(size + 1);
 
     for (int i = 0; i < size; i++) {
         (*path)[i]  = malloc(size + 1);
         (*nodes)[i] = NULL;
     }
 
-    (*pars) -> chrs[size] = '\0';
-    memset((*pars) -> vals, 0, size * sizeof(int));
+    (*pars)->chrs[size] = '\0';
+    memset((*pars)->vals, 0, size * sizeof(int));
 }
 
 void free_memory(params **pars, u_char ***path, Node ***nodes, int size) {
@@ -90,8 +91,8 @@ void free_memory(params **pars, u_char ***path, Node ***nodes, int size) {
         free((*path)[i]);
     }
 
-    free((*pars) -> vals);
-    free((*pars) -> chrs);
+    free((*pars)->vals);
+    free((*pars)->chrs);
     free(*pars);
     free(*path);
     free(*nodes);
@@ -102,8 +103,8 @@ void free_tree(Node *root) {
     if (root == NULL)
         return;
 
-    free_tree(root -> left);
-    free_tree(root -> right);
+    free_tree(root->left);
+    free_tree(root->right);
     free(root);
 }
 
@@ -211,16 +212,16 @@ void get_unique_vals(u_char *input, params *pars) {
     length = 0;
 
     while (*input != '\0') {
-        index = get_value(pars -> chrs, *input, length);
+        index = get_value(pars->chrs, *input, length);
 
         if (index == -1) {
-            pars -> chrs[length] = *input;
-            pars -> vals[length]++;
+            pars->chrs[length] = *input;
+            pars->vals[length]++;
             length++;
         }
 
         else {
-            pars -> vals[index]++;
+            pars->vals[index]++;
         }
 
         input++;
@@ -251,7 +252,7 @@ int get_path_size(u_char **path, int size) {
 
 void get_full_bytes(u_char *bytes, u_char *path, int length) {
 
-    int i, j, k;
+    int    i, j, k;
     u_char answer;
     i = j = k = 0;
 
@@ -281,9 +282,9 @@ Node *new_node(void) {
         exit(1);
 
     memset(node, 0, sizeof(Node));
-    node -> left   = NULL;
-    node -> right  = NULL;
-    node -> parent = NULL;
+    node->left   = NULL;
+    node->right  = NULL;
+    node->parent = NULL;
     return node;
 }
 
@@ -291,8 +292,8 @@ Node *node_assign(Node *node, int val, char chr) {
 
     if (node == NULL) {
         node       = new_node();
-        node -> chr  = chr;
-        node -> freq = val;
+        node->chr  = chr;
+        node->freq = val;
     }
 
     return node;
@@ -303,16 +304,16 @@ Node *create_subtree(Node *left, Node *right, params *pars) {
     int  *min;
     Node *root;
 
-    min   = pars -> min;
+    min   = pars->min;
     root  = new_node();
-    left  = node_assign(left, pars -> vals[min[0]], pars -> chrs[min[0]]);
-    right = node_assign(right, pars -> vals[min[1]], pars -> chrs[min[1]]);
+    left  = node_assign(left, pars->vals[min[0]], pars->chrs[min[0]]);
+    right = node_assign(right, pars->vals[min[1]], pars->chrs[min[1]]);
 
-    root -> left    = left;
-    root -> right   = right;
-    left -> parent  = root;
-    right -> parent = root;
-    root -> freq    = left -> freq + right -> freq;
+    root->left    = left;
+    root->right   = right;
+    left->parent  = root;
+    right->parent = root;
+    root->freq    = left->freq + right->freq;
     return root;
 }
 
@@ -321,13 +322,13 @@ Node *construct_tree(Node **nods, params *pars, int size) {
     Node *left, *right, *root;
     int   counter, low_a, low_b;
 
-    pars -> min = malloc(2 * sizeof(int));
+    pars->min = malloc(2 * sizeof(int));
     counter   = 0;
 
     while (counter != size - 1) {
 
-        pars -> min[0] = low_a = get_min_vals(pars -> vals, MAX_VAL, size);
-        pars -> min[1] = low_b = get_min_vals(pars -> vals, low_a, size);
+        pars->min[0] = low_a = get_min_vals(pars->vals, MAX_VAL, size);
+        pars->min[1] = low_b = get_min_vals(pars->vals, low_a, size);
 
         left  = (nods[low_a] != 0) ? nods[low_a] : NULL;
         right = (nods[low_b] != 0) ? nods[low_b] : NULL;
@@ -336,13 +337,13 @@ Node *construct_tree(Node **nods, params *pars, int size) {
         nods[low_a] = root;
         nods[low_b] = NULL;
 
-        pars -> vals[low_a] = pars -> vals[low_a] + pars -> vals[low_b];
-        pars -> vals[low_b] = MAX_VAL;
+        pars->vals[low_a] = pars->vals[low_a] + pars->vals[low_b];
+        pars->vals[low_b] = MAX_VAL;
 
         counter++;
     }
 
-    free(pars -> min);
+    free(pars->min);
     return root;
 }
 
@@ -353,28 +354,28 @@ Node *find_node(Node *root, char target) {
     if (root == NULL)
         return NULL;
 
-    if (root -> chr == target)
+    if (root->chr == target)
         return root;
 
-    curr = find_node(root -> left, target);
+    curr = find_node(root->left, target);
 
     if (curr == NULL)
-        curr = find_node(root -> right, target);
+        curr = find_node(root->right, target);
 
     return curr;
 }
 
 u_char *get_path(Node *curr, char target, u_char *path) {
 
-    int     i;
-    Node   *temp, *dummy;
+    int   i;
+    Node *temp, *dummy;
 
     temp = find_node(curr, target);
     i    = 0;
 
     while (temp != curr) {
-        dummy   = temp -> parent;
-        path[i] = (dummy -> left == temp) ? '0' : '1';
+        dummy   = temp->parent;
+        path[i] = (dummy->left == temp) ? '0' : '1';
         temp    = dummy;
         i++;
     }
@@ -403,34 +404,31 @@ void get_dictionary(u_char *chrs, Node *root, u_char **path, int size) {
     }
 }
 
-void recsive_function(Node *arr, u_char *full_p, Node *root) {
+void get_array(Node *root, Node *vec, int size) {
 
-    int i,j;
-    i = 0;
-    arr[i] = *root;
-    j = get(root);
+    int i = 0;
+    vector_add(&vec, *root);
 
-    while (i < j) {
+    while (i < size) {
+        Node temp = vec[i];
 
-        if (arr[i].left != NULL) {
-            arr[i+1] = *(arr[i].left);
+        if (temp.left != NULL) {
+            vector_add(&vec, *temp.left);
         }
 
-        if (arr[i].right != NULL) {
-            arr[i+2] = *(arr[i].right);
+        if (temp.right != NULL) {
+            vector_add(&vec, *temp.right);
         }
 
         i++;
     }
 }
 
-void get_full_path(u_char *full_p, u_char **path, int size, int tree_size, Node *root) {
+void get_full_path(u_char *full_p, u_char **path, int size, Node *root) {
 
     int i, j, k;
-    Node arr[size];
     i = j = k = 0;
 
-    recsive_function(arr, full_p, root);
     while (i < size) {
 
         if (path[k][j] == '\0') {
@@ -444,6 +442,33 @@ void get_full_path(u_char *full_p, u_char **path, int size, int tree_size, Node 
     }
 }
 
+void get_tree_path(Node *root, char *path) {
+
+    int   i, j, k;
+    Node *vec = vector_create();
+
+    k = get(root);
+    get_array(root, vec, k);
+
+    while (i < k) {
+        if (vec[i].chr != '0') {
+            path[i] = '1';
+
+            j = 0;
+            while (j < 8) {
+                path[k] = 0B00000001 & (vec[i].chr >> (7 - j));
+                k++;
+                j++;
+            }
+        }
+
+        else {
+            path[i] = '0';
+        }
+        i++;
+    }
+}
+
 int get(Node *root) {
 
     int result = 0;
@@ -453,8 +478,8 @@ int get(Node *root) {
     else
         return result;
 
-    result += get(root -> left);
-    result += get(root -> right);
+    result += get(root->left);
+    result += get(root->right);
 
     return result;
 }
@@ -466,33 +491,33 @@ int get(Node *root) {
 int main(void) {
 
     params *pars;
-    u_char *input, **path, *full_path, *bytes;
+    u_char *input_data, **path, *full_path, *bytes;
     Node   *root, **nodes;
-    int     size_a, size_b, byte_length, tree_size;
+    int     uni_val_size, path_total_length, byte_length, tree_size;
 
-    input  = file_process();
-    size_a = get_unique_size(input);
+    input_data   = file_process();
+    uni_val_size = get_unique_size(input_data);
 
-    memory_allocator(&pars, &path, &nodes, size_a);
-    get_unique_vals(input, pars);
-    root = construct_tree(nodes, pars, size_a);
-    get_dictionary(pars -> chrs, root, path, size_a);
+    memory_allocator(&pars, &path, &nodes, uni_val_size);
+    get_unique_vals(input_data, pars);
+    root = construct_tree(nodes, pars, uni_val_size);
+    get_dictionary(pars->chrs, root, path, uni_val_size);
 
-    size_b    = get_path_size(path, size_a);
-    tree_size    = get(root);
-    tree_size    = tree_size / (int)8 + 1;
-    full_path = malloc(size_b + tree_size);
-    get_full_path(full_path, path, size_b, tree_size, root);
+    path_total_length = get_path(path, uni_val_size);
+    tree_size = get(root);
+    tree_size = tree_size / (int)8 + 1;
+    full_path = malloc(path_total_length);
+    get_full_path(full_path, path, path_total_length, root);
 
-    byte_length  = (size_b % (int)8) ? (size_b / (int)8) + 1 : size_b / (int)8;
-    byte_length += tree_size + size_a;
+    byte_length  = (path_total_length % (int)8) ? (path_total_length / (int)8) + 1 : path_total_length / (int)8;
+    byte_length += tree_size + uni_val_size;
     bytes        = malloc(byte_length);
     memset(bytes, 0, byte_length);
 
-    get_full_bytes(bytes, full_path, size_b);
+    get_full_bytes(bytes, full_path, path_total_length);
     compressed_file_creation(bytes, byte_length);
 
-    free_memory(&pars, &path, &nodes, size_a);
+    free_memory(&pars, &path, &nodes, uni_val_size);
     free_tree(root);
     free(bytes);
     free(full_path);
