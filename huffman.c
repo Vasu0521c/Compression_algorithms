@@ -44,7 +44,7 @@ typedef struct {
 // Memory allocation and Free functions
 
 void *memory_allocator(int dt_size, int size);
-void  free_memory(params **pars, u_char ***path, Node ***nodes, int size);
+void free_tree(Node *root);
 
 // Tree and Dictionary operations
 
@@ -80,18 +80,6 @@ void *memory_allocator(int dt_size, int size) {
 
     memset(temp, 0, dt_size * size);
     return temp;
-}
-
-void free_memory(params **pars, u_char ***path, Node ***nodes, int size) {
-
-    for (int i = 0; i < size; i++) {
-        free((*path)[i]);
-    }
-
-    free((*pars) -> vals);
-    free((*pars) -> chrs);
-    free(*pars);
-    free(*path);
 }
 
 void free_tree(Node *root) {
@@ -468,7 +456,7 @@ void get_tree_path(params *pars, int size) {
     u_char *path, temp;
     Node   *vec = vector_create();
 
-    path = memory_allocator(sizeof(u_char), size + 1);
+    path = memory_allocator(sizeof(u_char), size);
     k    = get(pars -> root);
     get_array(pars -> root, &vec, k);
     l = 0;
@@ -488,7 +476,6 @@ void get_tree_path(params *pars, int size) {
             path[l] = (temp) ? '1' : '0';
         }
     }
-    path[l]         = '#';
     pars -> tree_path = path;
 }
 
@@ -537,12 +524,13 @@ int main(void) {
     path_length = get_path_length(pars -> path, uni_val_size);
     byte_length = get_length_in_bytes(tree_length);
     get_tree_path(pars, tree_length);
-    printf("%.*s\n", tree_length, pars -> tree_path);
     get_full_path(pars, path_length);
 
     bytes = memory_allocator(sizeof(u_char), byte_length);
-    get_full_bytes(bytes, pars -> tree_path, tree_length);
+    get_full_bytes(bytes, pars -> tree_path, tree_length + 1);
     compressed_file_creation(bytes, byte_length, "wb");
+
+    compressed_file_creation("#", 1, "a");
 
     byte_length = get_length_in_bytes(path_length);
     get_full_bytes(bytes, pars -> chr_path, path_length);

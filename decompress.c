@@ -1,37 +1,106 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+//================================//
+// Header Files
+//================================//
 
-#define GVN(Var) (#Var)
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+//================================//
+// Macros, Constants, Typedefs
+//================================//
+
+#define GVN(Var)  (#Var)
 #define GFN(func) (#func)
 
-typedef unsigned char u_char;
-typedef const char C_C;
+#define var = handle_failure(var, var_b) var = handle_func_failure(var, var_b, #var, __func__)
 
-void handle_func_failure(void *ptr, C_C *fail_func, C_C* var_name,  C_C *scope_func) {
+typedef unsigned char u_char;
+typedef const char    C_C;
+typedef struct Node Node;
+
+//================================//
+// Structures
+//================================//
+
+struct Node {
+
+    u_char chr;
+    Node   *left, *right;
+
+};
+
+//================================//
+// Forward Declarations
+//================================//
+
+// Tree Functions
+Node *new_node(void);
+Node *create_node(Node *root, Node *left, Node *right);
+Node *construct_tree(u_char *path, u_char seperator);
+
+// Memory & Error Handling
+void *memory_allocator(C_C *var_name, C_C *func_name, int data_type, int size);
+void  handle_func_failure(void *ptr, C_C *fail_func, C_C *var_name,
+                          C_C *scope_func);
+
+// I/O Functions
+u_char *handle_file_operation(void);
+
+// Data Process Functions
+int     get_sizeof_string(u_char *input);
+u_char *binary_to_u_char(u_char *input);
+u_char  get_path(u_char *input);
+
+//================================//
+// Tree Functions
+//================================//
+
+Node *new_node(void) {
+
+    Node *new = malloc();
+}
+
+//================================//
+// Error Handling / Debug Functions
+//================================//
+
+void handle_func_failure(void *ptr, C_C *fail_func, C_C *var_name,
+                         C_C *scope_func) {
 
     if (ptr == NULL) {
-        printf("ERROR : In \"%s\" function "
+        printf(
+            "ERROR : In \"%s\" function "
             "\"%s\" function Failed "
-            "for the variable \"%s\" \n", scope_func, fail_func, var_name);
+            "for the variable \"%s\" \n",
+            scope_func, fail_func, var_name);
         exit(1);
     }
 }
 
+//================================//
+// Memory Functions
+//================================//
+
 void *memory_allocator(C_C *var_name, C_C *func_name, int data_type, int size) {
 
-    void* memory = malloc(data_type * size);
-    handle_func_failure(memory, GFN(malloc), var_name, func_name);
+    void *memory = malloc(data_type * size);
+    handle_failure(memory, GFN(malloc));
     memset(memory, 0, data_type * size);
     return memory;
 }
 
+//================================//
+// I/O Functions
+//================================//
+
 u_char *handle_file_operation(void) {
 
     u_char *input;
-    int  size;
+    int     size;
+    FILE   *ptr;
 
-    FILE *ptr = fopen("compressed","rb");
+    ptr = fopen("compressed", "rb");
     handle_func_failure(ptr, GFN(fopen), GVN(ptr), __func__);
 
     fseek(ptr, 0L, SEEK_END);
@@ -70,7 +139,7 @@ u_char *binary_to_u_char(u_char *input) {
 
     for (int i = 0, j = 0; input[j] != '\0'; j++) {
         for (int k = 0; k < 8; i++, k++) {
-            temp = (input[j] >> (7 - k) & 0x1);
+            temp    = (input[j] >> (7 - k) & 0X1);
             path[i] = (temp) ? '1' : '0';
         }
         path[i] = '\0';
@@ -79,14 +148,46 @@ u_char *binary_to_u_char(u_char *input) {
     return path;
 }
 
+u_char get_path(u_char *input) {
+
+    u_char start;
+
+    while (*input != '#') {
+        input++;
+    }
+
+    return *input;
+}
+
+Node *create_node(Node *root, Node *left, Node *right) {
+
+    if (root == NULL)
+        root = new
+}
+
+Node *construct_tree(u_char *path, u_char seperator) {
+    
+    Node *root;
+
+    while (*path != '\0') {
+        if (*path == '0') {
+            root = create_node(root, NULL, NULL);
+        }
+    }
+    return root;
+}
+
 int main(void) {
 
+    Node   *root;
     u_char *input, *paths;
+    u_char  break_p;
 
-    input = handle_file_operation();
-    paths = binary_to_u_char(input);
-    printf("%s", paths);
-    
+    input   = handle_file_operation();
+    paths   = binary_to_u_char(input);
+    break_p = get_path(input);
+    root    = construct_tree(paths, break_p);
+
     free(input);
     free(paths);
     return 0;
