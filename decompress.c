@@ -56,6 +56,7 @@ int get_sizeof_string(u_char *input) {
         count++;
         input++;
     }
+    printf("%d", count);
     count *= 8;
     return count;
 }
