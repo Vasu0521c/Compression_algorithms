@@ -49,13 +49,13 @@ void  free_memory(params **pars, u_char ***path, Node ***nodes, int size);
 
 // Tree and Dictionary operations
 
-Node   *new_node(void);
-Node   *node_assign(Node *node, int val, char chr);
-Node   *create_subtree(Node *left, Node *right, params *pars);
-Node   *construct_tree(params *pars, int size);
-Node   *find_node(Node *root, char target);
-void    get_path(Node *curr, char target, u_char *path);
-void    get_dictionary(params *pars, int size);
+Node *new_node(void);
+Node *node_assign(Node *node, int val, char chr);
+Node *create_subtree(Node *left, Node *right, params *pars);
+Node *construct_tree(params *pars, int size);
+Node *find_node(Node *root, char target);
+void  get_path(Node *curr, char target, u_char *path);
+void  get_dictionary(params *pars, int size);
 
 // Data Processing
 
@@ -89,8 +89,8 @@ void free_memory(params **pars, u_char ***path, Node ***nodes, int size) {
         free((*path)[i]);
     }
 
-    free((*pars)->vals);
-    free((*pars)->chrs);
+    free((*pars) -> vals);
+    free((*pars) -> chrs);
     free(*pars);
     free(*path);
 }
@@ -100,8 +100,8 @@ void free_tree(Node *root) {
     if (root == NULL)
         return;
 
-    free_tree(root->left);
-    free_tree(root->right);
+    free_tree(root -> left);
+    free_tree(root -> right);
     free(root);
 }
 
@@ -208,20 +208,20 @@ void get_unique_vals(u_char *input, params *pars, int size) {
     int index, length;
     length = 0;
 
-    pars->vals = memory_allocator(sizeof(int), size);
-    pars->chrs = memory_allocator(sizeof(char), size);
+    pars -> vals = memory_allocator(sizeof(int), size);
+    pars -> chrs = memory_allocator(sizeof(char), size);
 
     while (*input != '\0') {
-        index = get_value(pars->chrs, *input, length);
+        index = get_value(pars -> chrs, *input, length);
 
         if (index == -1) {
-            pars->chrs[length] = *input;
-            pars->vals[length]++;
+            pars -> chrs[length] = *input;
+            pars -> vals[length]++;
             length++;
         }
 
         else {
-            pars->vals[index]++;
+            pars -> vals[index]++;
         }
 
         input++;
@@ -271,6 +271,13 @@ void get_full_bytes(u_char *bytes, u_char *path, int length) {
     }
 }
 
+int get_length_in_bytes(int length) {
+
+    int result;
+    result = (length % 8 == 0) ? length / (int)8 : (length / (int)8) + 1;
+    return result;
+}
+
 // ============================================
 // Node and Tree Functions
 // ============================================
@@ -283,9 +290,9 @@ Node *new_node(void) {
         exit(1);
 
     memset(node, 0, sizeof(Node));
-    node->left   = NULL;
-    node->right  = NULL;
-    node->parent = NULL;
+    node -> left   = NULL;
+    node -> right  = NULL;
+    node -> parent = NULL;
     return node;
 }
 
@@ -293,8 +300,8 @@ Node *node_assign(Node *node, int val, char chr) {
 
     if (node == NULL) {
         node       = new_node();
-        node->chr  = chr;
-        node->freq = val;
+        node -> chr  = chr;
+        node -> freq = val;
     }
 
     return node;
@@ -305,16 +312,16 @@ Node *create_subtree(Node *left, Node *right, params *pars) {
     int  *min;
     Node *root;
 
-    min   = pars->min;
+    min   = pars -> min;
     root  = new_node();
-    left  = node_assign(left, pars->vals[min[0]], pars->chrs[min[0]]);
-    right = node_assign(right, pars->vals[min[1]], pars->chrs[min[1]]);
+    left  = node_assign(left, pars -> vals[min[0]], pars -> chrs[min[0]]);
+    right = node_assign(right, pars -> vals[min[1]], pars -> chrs[min[1]]);
 
-    root->left    = left;
-    root->right   = right;
-    left->parent  = root;
-    right->parent = root;
-    root->freq    = left->freq + right->freq;
+    root -> left    = left;
+    root -> right   = right;
+    left -> parent  = root;
+    right -> parent = root;
+    root -> freq    = left -> freq + right -> freq;
     return root;
 }
 
@@ -324,15 +331,15 @@ Node *construct_tree(params *pars, int size) {
     Node  *left, *right, *root;
     int    counter, low_a, low_b;
 
-    pars->nodes = memory_allocator(sizeof(Node *), size);
-    pars->min   = memory_allocator(sizeof(int), 2);
+    pars -> nodes = memory_allocator(sizeof(Node *), size);
+    pars -> min   = memory_allocator(sizeof(int), 2);
     counter     = 0;
-    nods        = pars->nodes;
+    nods        = pars -> nodes;
 
     while (counter != size - 1) {
 
-        pars->min[0] = low_a = get_min_vals(pars->vals, MAX_VAL, size);
-        pars->min[1] = low_b = get_min_vals(pars->vals, low_a, size);
+        pars -> min[0] = low_a = get_min_vals(pars -> vals, MAX_VAL, size);
+        pars -> min[1] = low_b = get_min_vals(pars -> vals, low_a, size);
 
         left  = (nods[low_a] != 0) ? nods[low_a] : NULL;
         right = (nods[low_b] != 0) ? nods[low_b] : NULL;
@@ -341,14 +348,14 @@ Node *construct_tree(params *pars, int size) {
         nods[low_a] = root;
         nods[low_b] = NULL;
 
-        pars->vals[low_a] = pars->vals[low_a] + pars->vals[low_b];
-        pars->vals[low_b] = MAX_VAL;
+        pars -> vals[low_a] = pars -> vals[low_a] + pars -> vals[low_b];
+        pars -> vals[low_b] = MAX_VAL;
 
         counter++;
     }
 
-    free(pars->nodes);
-    free(pars->min);
+    free(pars -> nodes);
+    free(pars -> min);
     return root;
 }
 
@@ -359,13 +366,13 @@ Node *find_node(Node *root, char target) {
     if (root == NULL)
         return NULL;
 
-    if (root->chr == target)
+    if (root -> chr == target)
         return root;
 
-    curr = find_node(root->left, target);
+    curr = find_node(root -> left, target);
 
     if (curr == NULL)
-        curr = find_node(root->right, target);
+        curr = find_node(root -> right, target);
 
     return curr;
 }
@@ -379,8 +386,8 @@ void get_path(Node *curr, char target, u_char *path) {
     i    = 0;
 
     while (temp != curr) {
-        dummy   = temp->parent;
-        path[i] = (dummy->left == temp) ? '0' : '1';
+        dummy   = temp -> parent;
+        path[i] = (dummy -> left == temp) ? '0' : '1';
         temp    = dummy;
         i++;
     }
@@ -402,13 +409,13 @@ void reverse_path(u_char *path, int size) {
 
 void get_dictionary(params *pars, int size) {
 
-    u_char *chrs = pars->chrs;
-    pars->path   = memory_allocator(sizeof(u_char *), size);
+    u_char *chrs = pars -> chrs;
+    pars -> path   = memory_allocator(sizeof(u_char *), size);
 
     for (int i = 0; i < size; i++) {
-        pars->path[i] = memory_allocator(sizeof(u_char), size);
-        get_path(pars->root, chrs[i], pars->path[i]);
-        reverse_path(pars->path[i], get_size(pars->path[i]));
+        pars -> path[i] = memory_allocator(sizeof(u_char), size);
+        get_path(pars -> root, chrs[i], pars -> path[i]);
+        reverse_path(pars -> path[i], get_size(pars -> path[i]));
     }
 }
 
@@ -436,64 +443,56 @@ void get_array(Node *root, Node **vvec, int size) {
 
 void get_full_path(params *pars, int size) {
 
-    int i, j, k;
-    u_char *par;
-    i = j = k = 0;
+    u_char* par = memory_allocator(sizeof(u_char), size + 1);
+    int k = 0;
 
-    pars -> chr_path = memory_allocator(sizeof(u_char), size + 1);
-    par = pars -> chr_path;
-
-    while (i < size) {
-
-        if (pars->path[k][j] == '\0') {
+    for (int i = 0, j = 0; i < size; i++) {
+        
+        if (pars -> path[k][j] == '\0') {
             free(pars -> path[k]);
             j = 0;
             k++;
         }
 
-        par[i] = pars->path[k][j];
+        par[i] = pars -> path[k][j];
         i++;
         j++;
     }
+
+    par[size] = '\0';
     free(pars -> path[k]);
     free(pars -> path);
-    par[i] = '\0';
+    pars -> chr_path = par;
 }
 
 void get_tree_path(params *pars, int size) {
 
-    int     i, l, k;
-    u_char *path;
+    int     l, k;
+    u_char *path, temp;
     Node   *vec = vector_create();
 
-    k = get(pars->root);
-    i = l = 0;
-    pars->tree_path = memory_allocator(sizeof(u_char), size + 1);
-    path            = pars->tree_path;
-    get_array(pars->root, &vec, k);
+    path = memory_allocator(sizeof(u_char), size + 1);
+    k    = get(pars -> root);
+    get_array(pars -> root, &vec, k);
 
-    while (i < k) {
-        if (vec[i].chr) {
-            path[l] = '1';
-            l++;
+    for (int i = 0; i < k; i++, l++) {
 
-            u_char temp;
-            for (int j = 0; j < 8; j++, l++) {
-                temp    = 0B00000001 & (vec[i].chr >> (7 - j));
-                path[l] = (temp) ? '1' : '0';
-                temp    = k;
-            }
-            l--;
-        }
-
-        else {
+        if (!vec[i].chr) {
             path[l] = '0';
+            continue;
         }
-        i++;
-        l++;
+
+        path[l] = '1';
+
+        for (int j = 0; j < 8; j++) {
+            l++;
+            temp    = 0X01 & (vec[i].chr >> (7 - j));
+            path[l] = (temp) ? '1' : '0';
+            temp    = k;
+        }
     }
-    path[l] = '#';
-    path[l+1] = '\0';
+    path[l]         = '#';
+    pars -> tree_path = path;
 }
 
 int get(Node *root) {
@@ -505,17 +504,17 @@ int get(Node *root) {
     else
         return result;
 
-    result += get(root->left);
-    result += get(root->right);
+    result += get(root -> left);
+    result += get(root -> right);
 
     return result;
 }
 
 int get_tree_length(Node *root, int size) {
 
-    int result  = 0;
-    result      = get(root);
-    result     += size * 8;
+    int result;
+    result  = get(root);
+    result += size * 8;
     return result;
 }
 
@@ -534,34 +533,26 @@ int main(void) {
 
     pars = memory_allocator(sizeof(params), 1);
     get_unique_vals(input_data, pars, uni_val_size);
-    pars->root = construct_tree(pars, uni_val_size);
+    pars -> root = construct_tree(pars, uni_val_size);
     get_dictionary(pars, uni_val_size);
 
-    tree_length = get_tree_length(pars->root, uni_val_size);
-    path_length = get_path_length(pars->path, uni_val_size);
-
+    tree_length = get_tree_length(pars -> root, uni_val_size);
+    path_length = get_path_length(pars -> path, uni_val_size);
+    byte_length = get_length_in_bytes(tree_length);
     get_tree_path(pars, tree_length);
     get_full_path(pars, path_length);
 
-    tree_length--;
-    byte_length = (tree_length % 8 == 0) ? tree_length / (int)8 : (tree_length / (int)8) + 1;
-    byte_length++;
-
     bytes = memory_allocator(sizeof(u_char), byte_length);
-
     get_full_bytes(bytes, pars -> tree_path, tree_length);
     compressed_file_creation(bytes, byte_length, "wb");
 
-    free(bytes);
-
-    byte_length = (path_length % 8 == 0) ? path_length / (int)8 : (path_length / (int)8) + 1;
-    bytes = memory_allocator(sizeof(u_char), byte_length);
+    byte_length = get_length_in_bytes(path_length);
     get_full_bytes(bytes, pars -> chr_path, path_length);
     compressed_file_creation(bytes, byte_length, "a");
 
-    /* free_memory(&pars, &path, &nodes, uni_val_size); */
-    /* free_tree(root); */
-    /* free(bytes); */
-    /* free(full_path); */
+    free(pars -> chrs);
+    free(pars -> vals);
+    free(input_data);
+    free(bytes);
     return 0;
 }
