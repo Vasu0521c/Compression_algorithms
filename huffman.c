@@ -32,9 +32,8 @@ typedef struct {
 
     u_char **path;
     u_char  *chrs, *tree_path, *chr_path;
-    Node   **nodes;
     Node    *root;
-    int     *vals, *min;
+    int     *vals;
 
 } params;
 
@@ -51,7 +50,7 @@ void  free_memory(params **pars, u_char ***path, Node ***nodes, int size);
 
 Node *new_node(void);
 Node *node_assign(Node *node, int val, char chr);
-Node *create_subtree(Node *left, Node *right, params *pars);
+Node *create_subtree(Node *left, Node *right, params *pars, int *min);
 Node *construct_tree(params *pars, int size);
 Node *find_node(Node *root, char target);
 void  get_path(Node *curr, char target, u_char *path);
@@ -299,7 +298,7 @@ Node *new_node(void) {
 Node *node_assign(Node *node, int val, char chr) {
 
     if (node == NULL) {
-        node       = new_node();
+        node         = new_node();
         node -> chr  = chr;
         node -> freq = val;
     }
@@ -307,12 +306,10 @@ Node *node_assign(Node *node, int val, char chr) {
     return node;
 }
 
-Node *create_subtree(Node *left, Node *right, params *pars) {
+Node *create_subtree(Node *left, Node *right, params *pars, int *min) {
 
-    int  *min;
     Node *root;
 
-    min   = pars -> min;
     root  = new_node();
     left  = node_assign(left, pars -> vals[min[0]], pars -> chrs[min[0]]);
     right = node_assign(right, pars -> vals[min[1]], pars -> chrs[min[1]]);
@@ -330,20 +327,20 @@ Node *construct_tree(params *pars, int size) {
     Node **nods;
     Node  *left, *right, *root;
     int    counter, low_a, low_b;
+    int    *min;
 
-    pars -> nodes = memory_allocator(sizeof(Node *), size);
-    pars -> min   = memory_allocator(sizeof(int), 2);
-    counter     = 0;
-    nods        = pars -> nodes;
+    nods    = memory_allocator(sizeof(Node *), size);
+    min     = memory_allocator(sizeof(int), 2);
+    counter = 0;
 
     while (counter != size - 1) {
 
-        pars -> min[0] = low_a = get_min_vals(pars -> vals, MAX_VAL, size);
-        pars -> min[1] = low_b = get_min_vals(pars -> vals, low_a, size);
+        min[0] = low_a = get_min_vals(pars -> vals, MAX_VAL, size);
+        min[1] = low_b = get_min_vals(pars -> vals, low_a, size);
 
         left  = (nods[low_a] != 0) ? nods[low_a] : NULL;
         right = (nods[low_b] != 0) ? nods[low_b] : NULL;
-        root  = create_subtree(left, right, pars);
+        root  = create_subtree(left, right, pars, min);
 
         nods[low_a] = root;
         nods[low_b] = NULL;
@@ -354,8 +351,8 @@ Node *construct_tree(params *pars, int size) {
         counter++;
     }
 
-    free(pars -> nodes);
-    free(pars -> min);
+    free(nods);
+    free(min);
     return root;
 }
 
@@ -550,8 +547,11 @@ int main(void) {
     get_full_bytes(bytes, pars -> chr_path, path_length);
     compressed_file_creation(bytes, byte_length, "a");
 
+    free_tree(pars -> root);
     free(pars -> chrs);
     free(pars -> vals);
+    free(pars -> tree_path);
+    free(pars -> chr_path);
     free(input_data);
     free(bytes);
     return 0;
