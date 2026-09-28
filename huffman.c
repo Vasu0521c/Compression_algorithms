@@ -557,7 +557,6 @@ int main(void) {
     byte_length = (path_length % 8 == 0) ? path_length / (int)8 : (path_length / (int)8) + 1;
     bytes = memory_allocator(sizeof(u_char), byte_length);
     get_full_bytes(bytes, pars -> chr_path, path_length);
-    printf("%s %d\n", pars -> chr_path, byte_length);
     compressed_file_creation(bytes, byte_length, "a");
 
     /* free_memory(&pars, &path, &nodes, uni_val_size); */
