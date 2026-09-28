@@ -471,6 +471,7 @@ void get_tree_path(params *pars, int size) {
     path = memory_allocator(sizeof(u_char), size + 1);
     k    = get(pars -> root);
     get_array(pars -> root, &vec, k);
+    l = 0;
 
     for (int i = 0; i < k; i++, l++) {
 
@@ -485,7 +486,6 @@ void get_tree_path(params *pars, int size) {
             l++;
             temp    = 0X01 & (vec[i].chr >> (7 - j));
             path[l] = (temp) ? '1' : '0';
-            temp    = k;
         }
     }
     path[l]         = '#';
@@ -537,6 +537,7 @@ int main(void) {
     path_length = get_path_length(pars -> path, uni_val_size);
     byte_length = get_length_in_bytes(tree_length);
     get_tree_path(pars, tree_length);
+    printf("%.*s\n", tree_length, pars -> tree_path);
     get_full_path(pars, path_length);
 
     bytes = memory_allocator(sizeof(u_char), byte_length);

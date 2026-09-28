@@ -56,7 +56,6 @@ int get_sizeof_string(u_char *input) {
         count++;
         input++;
     }
-    printf("%d", count);
     count *= 8;
     return count;
 }
@@ -86,6 +85,7 @@ int main(void) {
 
     input = handle_file_operation();
     paths = binary_to_u_char(input);
+    printf("%s", paths);
     
     free(input);
     free(paths);
