@@ -28,6 +28,7 @@ struct Node {
 
     u_char chr;
     Node   *left, *right;
+    Node   *parent;
 
 };
 
@@ -168,27 +169,61 @@ u_char get_path(u_char *input) {
     return *input;
 }
 
-/* Node *create_node(Node *root, Node *left, Node *right) { */
+u_char get_byte_value(u_char *path, int i) {
 
-/*     if (root == NULL) */
-/*         root = new_node(); */
-/* } */
+    u_char value;
 
-/* Node *construct_tree(u_char *path, u_char seperator) { */
+    value = 0x0;
+
+    for (int j = 0; j < 8; j++) {
+        value = value << j;
+        value = value | (path[i] - '0');
+        i++;
+    }
+
+    return value;
+}
+
+int get_number_of_nodes(u_char *path) {
+
+    u_char byte_value;
+    int    i, count;
+
+    count = i = 0;
+    byte_value = get_byte_value(path, i);
+
+    while (byte_value != '#') {
+        for (int j = 0; j < 8; j++) {
+            if (path[i] == '0')
+                count++;
+            i++;
+        }
+        byte_value = get_byte_value(path, i);
+    }
+
+    return count;
+}
+
+Node *construct_tree(u_char *path, u_char seperator) {
     
-/*     Node *root; */
+    Node  *root;
+    Node **nodes;
+    int    i, size;
 
-/*     while (*path != '#') { */
-/*         if (*path == '0') { */
-/*             root = create_node(root, NULL, NULL); */
-/*         } */
+    size  = get_number_of_nodes(path);
+    nodes = memory_alloc(nodes, sizeof(Node *), size);
+    i = 0;
 
-/*         else { */
-/*             root = ; */
-/*         } */
-/*     } */
-/*     return root; */
-/* } */
+    while (*path != '#') {
+
+        for (; *path != '1'; i++) {
+            nodes[i] = new_node();
+            path++;
+        }
+
+    }
+    return root;
+}
 
 int main(void) {
 
@@ -198,7 +233,6 @@ int main(void) {
 
     input   = handle_file_operation();
     paths   = binary_to_u_char(input);
-    printf("%s\n", paths);
     /* break_p = get_path(input); */
     /* root    = construct_tree(paths, break_p); */
 
