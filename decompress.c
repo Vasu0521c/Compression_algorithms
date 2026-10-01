@@ -13,7 +13,8 @@
 #define GVN(Var)  (#Var)
 #define GFN(func) (#func)
 
-#define var = handle_failure(var, var_b) var = handle_func_failure(var, var_b, #var, __func__)
+#define handle_failure(var, var_b) handle_func_failure(var, var_b, #var, __func__)
+#define memory_alloc(name, var_a, var_b) memory_allocator(#name, __func__, var_a, var_b)
 
 typedef unsigned char u_char;
 typedef const char    C_C;
@@ -58,7 +59,8 @@ u_char  get_path(u_char *input);
 
 Node *new_node(void) {
 
-    Node *new = malloc();
+    Node *node = memory_alloc(node, sizeof(Node), 1);
+    return node;
 }
 
 //================================//
@@ -138,6 +140,13 @@ u_char *binary_to_u_char(u_char *input) {
     path = memory_allocator(GVN(path), __func__, sizeof(u_char), size);
 
     for (int i = 0, j = 0; input[j] != '\0'; j++) {
+        
+        if (input[j] == '#') {
+            path[i] = '#';
+            i++;
+            continue;
+        }
+
         for (int k = 0; k < 8; i++, k++) {
             temp    = (input[j] >> (7 - k) & 0X1);
             path[i] = (temp) ? '1' : '0';
@@ -159,23 +168,27 @@ u_char get_path(u_char *input) {
     return *input;
 }
 
-Node *create_node(Node *root, Node *left, Node *right) {
+/* Node *create_node(Node *root, Node *left, Node *right) { */
 
-    if (root == NULL)
-        root = new
-}
+/*     if (root == NULL) */
+/*         root = new_node(); */
+/* } */
 
-Node *construct_tree(u_char *path, u_char seperator) {
+/* Node *construct_tree(u_char *path, u_char seperator) { */
     
-    Node *root;
+/*     Node *root; */
 
-    while (*path != '\0') {
-        if (*path == '0') {
-            root = create_node(root, NULL, NULL);
-        }
-    }
-    return root;
-}
+/*     while (*path != '#') { */
+/*         if (*path == '0') { */
+/*             root = create_node(root, NULL, NULL); */
+/*         } */
+
+/*         else { */
+/*             root = ; */
+/*         } */
+/*     } */
+/*     return root; */
+/* } */
 
 int main(void) {
 
@@ -185,8 +198,9 @@ int main(void) {
 
     input   = handle_file_operation();
     paths   = binary_to_u_char(input);
-    break_p = get_path(input);
-    root    = construct_tree(paths, break_p);
+    printf("%s\n", paths);
+    /* break_p = get_path(input); */
+    /* root    = construct_tree(paths, break_p); */
 
     free(input);
     free(paths);

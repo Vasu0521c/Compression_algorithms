@@ -228,7 +228,7 @@ int get_size(u_char *arr) {
 int get_path_length(u_char **path, int size) {
 
     int i, result;
-    i = 0;
+    i = result = 0;
 
     while (i < size) {
         result += get_size(path[i]);
@@ -321,7 +321,7 @@ Node *construct_tree(params *pars, int size) {
     min     = memory_allocator(sizeof(int), 2);
     counter = 0;
 
-    while (counter != size - 1) {
+    while (counter < (size - 1)) {
 
         min[0] = low_a = get_min_vals(pars -> vals, MAX_VAL, size);
         min[1] = low_b = get_min_vals(pars -> vals, low_a, size);
@@ -412,6 +412,7 @@ void get_array(Node *root, Node **vvec, int size) {
 
     while (i < size) {
         Node temp = vec[i];
+        printf("%c", vec[i].chr);
 
         if (temp.left != NULL) {
             vector_add(&vec, *temp.left);
@@ -440,7 +441,6 @@ void get_full_path(params *pars, int size) {
         }
 
         par[i] = pars -> path[k][j];
-        i++;
         j++;
     }
 
@@ -525,6 +525,8 @@ int main(void) {
     byte_length = get_length_in_bytes(tree_length);
     get_tree_path(pars, tree_length);
     get_full_path(pars, path_length);
+    printf("%s\n", pars -> tree_path);
+    printf("%s\n", pars -> chr_path);
 
     bytes = memory_allocator(sizeof(u_char), byte_length);
     get_full_bytes(bytes, pars -> tree_path, tree_length + 1);
