@@ -214,14 +214,9 @@ Node *construct_tree(u_char *path, u_char seperator) {
     nodes = memory_alloc(nodes, sizeof(Node *), size);
     i = 0;
 
-    while (*path != '#') {
-
-        for (; *path != '1'; i++) {
-            nodes[i] = new_node();
-            path++;
-        }
-
+    while (*path != '\0') {
     }
+
     return root;
 }
 
