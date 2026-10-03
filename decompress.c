@@ -204,17 +204,48 @@ int get_number_of_nodes(u_char *path) {
     return count;
 }
 
+u_char get_char(char *path, int *i) {
+
+    u_char value;
+    (*i)++;
+    value = 0x0;
+    for (int j = 0; j < 8; j++) {
+        value = value << j;
+        value = value | path[*i] - '0';
+    }
+    return 
+}
+
 Node *construct_tree(u_char *path, u_char seperator) {
     
     Node  *root;
-    Node **nodes;
-    int    i, size;
+    Node  *curr, *prev;
+    u_char chr;
 
-    size  = get_number_of_nodes(path);
-    nodes = memory_alloc(nodes, sizeof(Node *), size);
-    i = 0;
+    curr = prev = NULL;
 
-    while (*path != '\0') {
+    for (int i = 0; path[i] != '#'; i++) {
+
+        chr = (path[i] == '1')? get_char(path, &i): '0';
+
+        if (curr == NULL) {
+            curr = new_node();
+            prev = curr;
+            path++;
+            continue;
+        }
+        curr = new_node();
+        if (prev->left == NULL) {
+            prev -> left = curr;
+        }
+        else {
+            while (prev -> right != NULL)
+                prev = prev -> parent;
+            prev -> right = curr;
+        }
+        curr -> parent = prev;
+        prev = curr;
+        
     }
 
     return root;
