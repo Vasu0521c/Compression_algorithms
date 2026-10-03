@@ -164,6 +164,7 @@ u_char* binary_to_u_char(u_char* input) {
             temp    = (input[j] >> (7 - k) & 0X1);
             path[i] = (temp) ? '1' : '0';
         }
+
         path[i] = '\0';
     }
 
