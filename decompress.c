@@ -228,14 +228,15 @@ Node *construct_tree(u_char *path) {
 
         chr = (path[i] == '1') ? get_char(path, &i) : '0';
 
-        if (chr == '0')
-            prev = curr;
-
+        prev = curr;
         curr = new_node();
         prev = handle_prev(prev, curr);
 
         curr->parent = prev;
         curr->chr    = chr;
+
+        if (chr == '1')
+            curr = prev;
     }
     return root;
 }
@@ -337,6 +338,7 @@ u_char *get_path(Node *root, Node *node) {
         size++;
     }
 
+    printf("passed\n");
     path = memory_alloc(path, sizeof(u_char), size + 1);
 
     for (curr = node; curr != root; i++) {
@@ -366,7 +368,7 @@ u_char **get_dictionary(Node *root, Node **nodes) {
     return path;
 }
 
-int    main(void) {
+int main(void) {
 
     Node   **nodes;
     Node    *root;

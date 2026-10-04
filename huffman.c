@@ -399,26 +399,17 @@ void get_dictionary(params *pars, int size) {
     }
 }
 
-void get_array(Node *root, Node **vvec, int size) {
+Node* get_array(Node *root, Node *vec, int size) {
 
-    int   i   = 0;
-    Node *vec = *vvec;
-    vector_add(&vec, *root);
+    if (root)
+        vector_add(&vec, *root);
+    else
+        return vec;
 
-    while (i < size) {
-        Node temp = vec[i];
+    vec = get_array(root -> left, vec, size);
+    vec = get_array(root -> right, vec, size);
 
-        if (temp.left != NULL) {
-            vector_add(&vec, *temp.left);
-        }
-
-        if (temp.right != NULL) {
-            vector_add(&vec, *temp.right);
-        }
-
-        i++;
-    }
-    *vvec = vec;
+    return vec;
 }
 
 void get_full_path(params *pars, int size) {
@@ -452,7 +443,7 @@ void get_tree_path(params *pars, int size) {
 
     path = memory_allocator(sizeof(u_char), size);
     k    = get(pars->root);
-    get_array(pars->root, &vec, k);
+    vec  = get_array(pars->root, vec, k);
     l = 0;
 
     for (int i = 0; i < k; i++, l++) {
