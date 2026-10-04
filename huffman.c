@@ -525,7 +525,7 @@ int main(void) {
     get_full_bytes(bytes, pars->tree_path, tree_length + 1);
     compressed_file_creation(bytes, byte_length, "wb");
 
-    compressed_file_creation("#", 1, "a");
+    compressed_file_creation((u_char *)"#", 1, "a");
 
     byte_length = get_length_in_bytes(path_length);
     get_full_bytes(bytes, pars->chr_path, path_length);

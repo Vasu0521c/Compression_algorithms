@@ -63,7 +63,10 @@ u_char *binary_to_u_char(u_char *input);
 
 Node *new_node(void) {
 
-    Node *node = memory_alloc(node, sizeof(Node), 1);
+    Node *node   = memory_alloc(node, sizeof(Node), 1);
+    node->left   = NULL;
+    node->right  = NULL;
+    node->parent = NULL;
     return node;
 }
 
@@ -194,6 +197,7 @@ u_char get_char(u_char *path, int *i) {
         value = (value << 1) | (path[*i] - '0');
     }
 
+    (*i)--;
     return value;
 }
 
