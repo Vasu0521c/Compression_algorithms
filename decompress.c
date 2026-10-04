@@ -356,6 +356,7 @@ u_char **get_dictionary(Node *root, Node **nodes) {
 
     for (int i = 0; i < size; i++) {
         path[i] = get_path(root, nodes[i]);
+        printf("%s",path[i]);
     }
 
     return path;

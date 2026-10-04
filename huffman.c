@@ -2,7 +2,7 @@
 // Header Files
 // ===============================================
 
-#include "../../custom_header_files/downloaded_ones/vec.h"
+#include "../../custom_headers/downloaded_ones/vec.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
