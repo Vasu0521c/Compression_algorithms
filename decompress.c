@@ -64,6 +64,7 @@ u_char *binary_to_u_char(u_char *input);
 Node *new_node(void) {
 
     Node *node   = memory_alloc(node, sizeof(Node), 1);
+    node->chr    = '0';
     node->left   = NULL;
     node->right  = NULL;
     node->parent = NULL;
@@ -156,6 +157,7 @@ u_char *binary_to_u_char(u_char *input) {
     size = get_sizeof_string(input) + 1;
     path = memory_allocator(GVN(path), __func__, sizeof(u_char), size);
 
+
     for (int i = 0, j = 0; input[j] != '\0'; j++) {
 
         if (input[j] == '#') {
@@ -164,10 +166,13 @@ u_char *binary_to_u_char(u_char *input) {
             continue;
         }
 
+        printf("Individual byte %d : ", i);
         for (int k = 0; k < 8; i++, k++) {
-            temp    = (input[j] >> (7 - k) & 0X1);
+            temp    = (input[j] >> (7 - k)) & 0X1;
             path[i] = (temp) ? '1' : '0';
+            printf("%c", path[i]);
         }
+        printf("\n");
 
         path[i] = '\0';
     }
@@ -215,19 +220,34 @@ Node *handle_prev(Node *parent, Node *child) {
     return parent;
 }
 
+_Bool check_hashtag(u_char *path, int i) {
+
+    for (int j = 0; j < 8; i++, j++) {
+        if (path[i] == '#')
+            return 1;
+    }
+
+    return 0;
+}
+
 Node *construct_tree(u_char *path) {
 
     Node  *root;
     Node  *curr, *prev;
     u_char chr;
+    _Bool  breaker;
 
-    root = new_node();
-    curr = root;
+    root    = new_node();
+    curr    = root;
+    breaker = 0;
 
     for (int i = 1; path[i] != '#'; i++) {
 
-        chr = (path[i] == '1') ? get_char(path, &i) : '0';
+        breaker = check_hashtag(path, i);
+        if (breaker)
+            break;
 
+        chr = (path[i] == '1') ? get_char(path, &i) : '0';
         prev = curr;
         curr = new_node();
         prev = handle_prev(prev, curr);
@@ -235,7 +255,7 @@ Node *construct_tree(u_char *path) {
         curr->parent = prev;
         curr->chr    = chr;
 
-        if (chr == '1')
+        if (chr != '0')
             curr = prev;
     }
     return root;
@@ -273,7 +293,7 @@ Node **get_all_nodes(Node *root, int size) {
     Node **tree;
 
     tree = memory_alloc(tree, sizeof(Node*), size);
-    dummy = memory_alloc(dummy, sizeof(Node), size);
+    dummy = new_node();
 
     for (int i = 0; i < size; i++) {
         tree[i] = dummy;
@@ -343,10 +363,7 @@ u_char *get_path(Node *root, Node *node) {
 
     for (curr = node; curr != root; i++) {
         parent = curr -> parent;
-        if (parent->left == curr)
-            path[i] = '0';
-        else
-            path[i] = '1';
+        path[i] = (parent->left == curr) ? '0' : '1';
     }
 
     path[i] = '\0';
@@ -362,7 +379,7 @@ u_char **get_dictionary(Node *root, Node **nodes) {
 
     for (int i = 0; i < size; i++) {
         path[i] = get_path(root, nodes[i]);
-        printf("%s",path[i]);
+        printf("%s\n",path[i]);
     }
 
     return path;
@@ -383,8 +400,8 @@ int main(void) {
 
     free(input);
     free(paths);
-    free_tree(root);
     free(nodes);
     free(path);
+    free_tree(root);
     return 0;
 }

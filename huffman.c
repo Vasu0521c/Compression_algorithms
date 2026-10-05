@@ -121,7 +121,7 @@ u_char *file_process(void) {
     return input;
 }
 
-void compressed_file_creation(u_char *bytes, int byte_length, char *mode) {
+void compressed_file_creation(void *bytes, int byte_length, char *mode) {
 
     FILE *ptr = fopen("compressed", mode);
 
@@ -461,7 +461,12 @@ void get_tree_path(params *pars, int size) {
             path[l] = (temp) ? '1' : '0';
         }
     }
-    printf("%s", path);
+
+    while (l < size) {
+        path[l] = '0';
+        l++;
+    }
+
     pars->tree_path = path;
 }
 
@@ -513,14 +518,14 @@ int main(void) {
     get_full_path(pars, path_length);
 
     bytes = memory_allocator(sizeof(u_char), byte_length);
-    get_full_bytes(bytes, pars->tree_path, tree_length + 1);
+    get_full_bytes(bytes, pars->tree_path, tree_length);
     compressed_file_creation(bytes, byte_length, "wb");
 
-    compressed_file_creation((u_char *)"#", 1, "a");
+    compressed_file_creation("#", 1, "ab");
 
     byte_length = get_length_in_bytes(path_length);
     get_full_bytes(bytes, pars->chr_path, path_length);
-    compressed_file_creation(bytes, byte_length, "a");
+    compressed_file_creation(bytes, byte_length, "ab");
 
     free_tree(pars->root);
     free(pars->chrs);
