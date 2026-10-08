@@ -64,6 +64,7 @@ void    get_unique_vals(u_char *input, params *pars, int size);
 int     get_unique_size(u_char *input);
 int     get_value(u_char *arr, u_char target, int size);
 int     get(Node *root);
+int     get_full_byte_size(int size);
 
 // =========================================
 // Memory Functions
@@ -238,6 +239,7 @@ void get_full_bytes(u_char *bytes, u_char *path, int length) {
     int    i, j, k;
     u_char answer;
     i = j = k = 0;
+    length = get_full_byte_size(length);
 
     while (i < length) {
 
@@ -396,6 +398,7 @@ void get_dictionary(params *pars, int size) {
         pars->path[i] = memory_allocator(sizeof(u_char), size);
         get_path(pars->root, chrs[i], pars->path[i]);
         reverse_path(pars->path[i], get_size(pars->path[i]));
+        printf("%s\n", pars -> path[i]);
     }
 }
 
@@ -435,13 +438,20 @@ void get_full_path(params *pars, int size) {
     pars->chr_path = par;
 }
 
+int get_full_byte_size(int size) {
+
+    return size + 8 - (size % 8);
+}
+
 void get_tree_path(params *pars, int size) {
 
     int     l, k;
     u_char *path, temp;
     Node   *vec = vector_create();
 
-    path = memory_allocator(sizeof(u_char), size);
+    size = get_full_byte_size(size);
+    printf("size %d\n", size);
+    path = memory_allocator(sizeof(u_char), size + 1);
     k    = get(pars->root);
     vec  = get_array(pars->root, vec, k);
     l = 0;
@@ -462,11 +472,16 @@ void get_tree_path(params *pars, int size) {
         }
     }
 
+    printf("size %d\n", size);
+    printf("%d\n",l);
+
     while (l < size) {
         path[l] = '0';
         l++;
     }
+    path[l] = '\0';
 
+    printf("\n%s\n", path);
     pars->tree_path = path;
 }
 

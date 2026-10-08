@@ -166,17 +166,15 @@ u_char *binary_to_u_char(u_char *input) {
             continue;
         }
 
-        printf("Individual byte %d : ", i);
         for (int k = 0; k < 8; i++, k++) {
             temp    = (input[j] >> (7 - k)) & 0X1;
             path[i] = (temp) ? '1' : '0';
-            printf("%c", path[i]);
         }
-        printf("\n");
 
         path[i] = '\0';
     }
 
+    free(input);
     return path;
 }
 
@@ -249,6 +247,7 @@ Node *construct_tree(u_char *path) {
 
         chr = (path[i] == '1') ? get_char(path, &i) : '0';
         prev = curr;
+        char something = path[i];
         curr = new_node();
         prev = handle_prev(prev, curr);
 
@@ -259,21 +258,6 @@ Node *construct_tree(u_char *path) {
             curr = prev;
     }
     return root;
-}
-
-int get_tree_size(Node *root) {
-
-    int result = 0;
-
-    if (root == NULL)
-        return result;
-
-    result++;
-
-    result += get_tree_size(root -> left);
-    result += get_tree_size(root -> right);
-
-    return result;
 }
 
 void push_(Node **arr, Node *elem) {
@@ -287,32 +271,35 @@ void push_(Node **arr, Node *elem) {
     (arr[i] -> visited)++;
 }
 
-Node **get_all_nodes(Node *root, int size) {
+int get_value_count(Node *root) {
 
-    Node *curr, *dummy;
-    Node **tree;
+    int result = 0;
 
-    tree = memory_alloc(tree, sizeof(Node*), size);
-    dummy = new_node();
+    if (root == NULL)
+        return result;
 
-    for (int i = 0; i < size; i++) {
-        tree[i] = dummy;
+    if (root -> chr != '0')
+        result++;
+
+    result += get_value_count(root -> left);
+    result += get_value_count(root -> right);
+
+    return result;
+    
+}
+
+void assign_values(Node *root, Node **nodes, int *i) {
+
+    if (root == NULL)
+        return;
+
+    if (root->chr != '0') {
+        nodes[*i] = root;
+        (*i)++;
     }
 
-    push_(tree, root);
-
-    for (int i = 0; i < size; i++) {
-        curr = tree[i];
-
-        if (curr -> left)
-            push_(tree, curr -> left);
-
-        if (curr -> right)
-            push_(tree, curr -> right);
-
-    }
-    free(dummy);
-    return tree;
+    assign_values(root -> left, nodes, i);
+    assign_values(root -> left, nodes, i);
 }
 
 Node **get_chrs(Node *root) {
@@ -321,25 +308,11 @@ Node **get_chrs(Node *root) {
     Node **tree;
     int    size, count;
 
-    size = get_tree_size(root);
-    tree = get_all_nodes(root, size);
-    count = 0;
-
-    for (int i = 0; i < size; i++) {
-        if (tree[i] -> chr != '0')
-            count++;
-    }
-
+    count = get_value_count(root);
     nodes = memory_alloc(nodes, sizeof(Node*), count);
+    size  = 0;
+    assign_values(root, nodes, &size);
 
-    for (int i = 0, j = 0; i < size; i++) {
-        if (tree[i]->chr != '0') {
-            nodes[j] = tree[i];
-            j++;
-        }
-    }
-
-    free(tree);
     return nodes;
 }
 
@@ -358,12 +331,12 @@ u_char *get_path(Node *root, Node *node) {
         size++;
     }
 
-    printf("passed\n");
     path = memory_alloc(path, sizeof(u_char), size + 1);
 
     for (curr = node; curr != root; i++) {
         parent = curr -> parent;
         path[i] = (parent->left == curr) ? '0' : '1';
+        curr = parent;
     }
 
     path[i] = '\0';
@@ -375,6 +348,7 @@ u_char **get_dictionary(Node *root, Node **nodes) {
     u_char **path;
     int    size;
 
+    size = get_value_count(root);
     path = memory_alloc(path, sizeof(u_char *), size);
 
     for (int i = 0; i < size; i++) {
@@ -398,7 +372,6 @@ int main(void) {
     nodes = get_chrs(root);
     path  = get_dictionary(root, nodes);
 
-    free(input);
     free(paths);
     free(nodes);
     free(path);
