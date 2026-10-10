@@ -398,7 +398,6 @@ void get_dictionary(params *pars, int size) {
         pars->path[i] = memory_allocator(sizeof(u_char), size);
         get_path(pars->root, chrs[i], pars->path[i]);
         reverse_path(pars->path[i], get_size(pars->path[i]));
-        printf("%s\n", pars -> path[i]);
     }
 }
 
@@ -450,7 +449,6 @@ void get_tree_path(params *pars, int size) {
     Node   *vec = vector_create();
 
     size = get_full_byte_size(size);
-    printf("size %d\n", size);
     path = memory_allocator(sizeof(u_char), size + 1);
     k    = get(pars->root);
     vec  = get_array(pars->root, vec, k);
@@ -472,8 +470,6 @@ void get_tree_path(params *pars, int size) {
         }
     }
 
-    printf("size %d\n", size);
-    printf("%d\n",l);
 
     while (l < size) {
         path[l] = '0';
@@ -481,7 +477,6 @@ void get_tree_path(params *pars, int size) {
     }
     path[l] = '\0';
 
-    printf("\n%s\n", path);
     pars->tree_path = path;
 }
 
