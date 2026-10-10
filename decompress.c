@@ -338,6 +338,18 @@ u_char *get_path(Node *root, Node *node) {
     return path;
 }
 
+void reverse_path(u_char *path, int size) {
+
+    u_char temp;
+    size--;
+
+    for (int i = 0; i < size / 2; i++) {
+        temp           = path[i];
+        path[i]        = path[size - i];
+        path[size - i] = temp;
+    }
+}
+
 u_char **get_dictionary(Node *root, Node **nodes, int size) {
 
     u_char **path;
@@ -346,6 +358,8 @@ u_char **get_dictionary(Node *root, Node **nodes, int size) {
 
     for (int i = 0; i < size; i++) {
         path[i] = get_path(root, nodes[i]);
+        reverse_path(path[i], get_sizeof_string(path[i]));
+        printf("%s\n", path[i]);
     }
 
     return path;
@@ -378,7 +392,7 @@ int get_value(u_char *paths, u_char **path, int i, int size) {
     int index, dummy;
 
     index = 0;
-    
+
     for (int j = 0; j < size; j++) {
         dummy = is_same(paths, path, i, j);
         if (dummy != -1) {
@@ -398,17 +412,18 @@ u_char *get_extracted_values(u_char *paths, Node **nodes, u_char **path,
     value  = 0;
     m_p_s  = *size;
     sep    = get_actual_value(paths);
-    length = (*size) * 8;
+    length = (*size);
     *size  = sep + get_sizeof_string(&(paths[sep]));
-    bytes  = memory_alloc(bytes, sizeof(u_char), length);
+    bytes  = memory_alloc(bytes, sizeof(u_char), length + 1);
 
     for (int i = sep; i < (*size);) {
-        index = get_value(paths, path, i, m_p_s);
-        i    += get_sizeof_string(path[index]);
-        bytes[value] = nodes[index] -> chr;
+        index         = get_value(paths, path, i, m_p_s);
+        i            += get_sizeof_string(path[index]);
+        bytes[value]  = nodes[index]->chr;
         value++;
     }
-    printf("%s\n", bytes);
+    bytes[value] = '\0';
+    *size        = value;
     return bytes;
 }
 
@@ -430,9 +445,20 @@ void reverse_sort_dictionary(u_char **path, int size) {
     }
 }
 
-void write_decompressed_data(u_char *bytes, int size) {}
+void write_decompressed_data(u_char *bytes, int size) {
 
-int  main(void) {
+    FILE *ptr;
+    ptr = fopen("extracted_file", "wb");
+
+    if (ptr == NULL) {
+        printf("file open failed\n");
+        exit(1);
+    }
+
+    fwrite(bytes, 1, size, ptr);
+}
+
+int main(void) {
 
     Node   **nodes;
     Node    *root;

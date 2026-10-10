@@ -54,7 +54,7 @@ Node *create_subtree(Node *left, Node *right, params *pars, int *min);
 Node *construct_tree(params *pars, int size);
 Node *find_node(Node *root, char target);
 void  get_path(Node *curr, char target, u_char *path);
-void  get_dictionary(params *pars, int size);
+void  get_dictionary(params *pars, u_char *input_data, int size);
 
 // Data Processing
 
@@ -239,7 +239,7 @@ void get_full_bytes(u_char *bytes, u_char *path, int length) {
     int    i, j, k;
     u_char answer;
     i = j = k = 0;
-    length = get_full_byte_size(length);
+    length    = get_full_byte_size(length);
 
     while (i < length) {
 
@@ -389,27 +389,28 @@ void reverse_path(u_char *path, int size) {
     }
 }
 
-void get_dictionary(params *pars, int size) {
+void get_dictionary(params *pars, u_char *input_data, int size) {
 
-    u_char *chrs = pars->chrs;
+    u_char *chrs = input_data;
     pars->path   = memory_allocator(sizeof(u_char *), size);
 
     for (int i = 0; i < size; i++) {
         pars->path[i] = memory_allocator(sizeof(u_char), size);
         get_path(pars->root, chrs[i], pars->path[i]);
         reverse_path(pars->path[i], get_size(pars->path[i]));
+        printf("%s\n", pars->path[i]);
     }
 }
 
-Node* get_array(Node *root, Node *vec, int size) {
+Node *get_array(Node *root, Node *vec, int size) {
 
     if (root)
         vector_add(&vec, *root);
     else
         return vec;
 
-    vec = get_array(root -> left, vec, size);
-    vec = get_array(root -> right, vec, size);
+    vec = get_array(root->left, vec, size);
+    vec = get_array(root->right, vec, size);
 
     return vec;
 }
@@ -432,15 +433,13 @@ void get_full_path(params *pars, int size) {
     }
 
     par[size] = '\0';
+    printf("%s\n", par);
     free(pars->path[k]);
     free(pars->path);
     pars->chr_path = par;
 }
 
-int get_full_byte_size(int size) {
-
-    return size + 8 - (size % 8);
-}
+int  get_full_byte_size(int size) { return size + 8 - (size % 8); }
 
 void get_tree_path(params *pars, int size) {
 
@@ -452,7 +451,7 @@ void get_tree_path(params *pars, int size) {
     path = memory_allocator(sizeof(u_char), size + 1);
     k    = get(pars->root);
     vec  = get_array(pars->root, vec, k);
-    l = 0;
+    l    = 0;
 
     for (int i = 0; i < k; i++, l++) {
 
@@ -470,12 +469,12 @@ void get_tree_path(params *pars, int size) {
         }
     }
 
-
     while (l < size) {
         path[l] = '0';
         l++;
     }
     path[l] = '\0';
+    printf("%s\n", path);
 
     pars->tree_path = path;
 }
@@ -511,7 +510,8 @@ int main(void) {
 
     params *pars;
     u_char *input_data, *bytes;
-    int     uni_val_size, path_length, tree_length, byte_length;
+    int     uni_val_size, size;
+    int     path_length, tree_length, byte_length;
 
     input_data   = file_process();
     uni_val_size = get_unique_size(input_data);
@@ -519,10 +519,11 @@ int main(void) {
     pars = memory_allocator(sizeof(params), 1);
     get_unique_vals(input_data, pars, uni_val_size);
     pars->root = construct_tree(pars, uni_val_size);
-    get_dictionary(pars, uni_val_size);
+    size       = get_size(input_data);
+    get_dictionary(pars, input_data, size);
 
     tree_length = get_tree_length(pars->root, uni_val_size);
-    path_length = get_path_length(pars->path, uni_val_size);
+    path_length = get_path_length(pars->path, size);
     byte_length = get_length_in_bytes(tree_length);
     get_tree_path(pars, tree_length);
     get_full_path(pars, path_length);
@@ -533,6 +534,7 @@ int main(void) {
 
     compressed_file_creation("#", 1, "ab");
 
+    memset(bytes, 0, byte_length);
     byte_length = get_length_in_bytes(path_length);
     get_full_bytes(bytes, pars->chr_path, path_length);
     compressed_file_creation(bytes, byte_length, "ab");
