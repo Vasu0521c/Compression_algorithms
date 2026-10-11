@@ -96,7 +96,7 @@ void *memory_allocator(C_C *var_name, C_C *func_name, int data_type, int size) {
 
     void *memory = malloc(data_type * size);
     handle_failure(memory, GFN(malloc));
-    memset(memory, 0, data_type * size);
+    memset(memory, '\0', data_type * size);
     return memory;
 }
 
@@ -445,7 +445,7 @@ void reverse_sort_dictionary(u_char **path, int size) {
     }
 }
 
-void write_decompressed_data(u_char *bytes, int size) {
+void write_decompressed_data(u_char *bytes, int *size) {
 
     FILE *ptr;
     ptr = fopen("extracted_file", "wb");
@@ -455,7 +455,11 @@ void write_decompressed_data(u_char *bytes, int size) {
         exit(1);
     }
 
-    fwrite(bytes, 1, size, ptr);
+    int siz = *size;
+    printf("the actual byte : %s\n", bytes);
+    printf("size for fwrite : %d\n", siz);
+    printf("size of buffer : %d\n", get_sizeof_string(bytes));
+    fwrite(bytes, siz - 1, siz - 1, ptr);
 }
 
 int main(void) {
@@ -475,7 +479,7 @@ int main(void) {
 
     bytes = get_extracted_values(paths, nodes, path, &size);
 
-    write_decompressed_data(bytes, size);
+    write_decompressed_data(bytes, &size);
 
     free(paths);
     free(nodes);

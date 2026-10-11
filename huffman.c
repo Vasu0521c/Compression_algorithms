@@ -14,8 +14,18 @@
 #define ARR_SIZE 255
 #define MAX_VAL  10000000
 
-typedef struct Node   Node;
+#define GVN(Var)  (#Var)
+#define GFN(func) (#func)
+
+#define handle_failure(var, var_b)                  \
+    handle_func_failure(var, var_b, #var, __func__)
+
+#define memory_alloc(name, var_a, var_b)            \
+    memory_allocator(#name, __func__, var_a, var_b)
+
 typedef unsigned char u_char;
+typedef const char    C_C;
+typedef struct Node   Node;
 
 //==============================================
 // Structures
@@ -55,16 +65,20 @@ Node *construct_tree(params *pars, int size);
 Node *find_node(Node *root, char target);
 void  get_path(Node *curr, char target, u_char *path);
 void  get_dictionary(params *pars, u_char *input_data, int size);
+int   get_tree_size(Node *root);
 
 // Data Processing
 
 u_char *file_process(void);
-int     get_min_vals(int *arr, int val, int size);
+void    compressed_file_creation(void *bytes, int byte_length, char *mode);
 void    get_unique_vals(u_char *input, params *pars, int size);
-int     get_unique_size(u_char *input);
+int     get_min_vals(int *arr, int val, int size);
 int     get_value(u_char *arr, u_char target, int size);
-int     get(Node *root);
+int     get_unique_size(u_char *input);
+int     get_size(u_char *arr);
+int     get_path_length(u_char **path, int size);
 int     get_full_byte_size(int size);
+int     get_length_in_bytes(int length);
 
 // =========================================
 // Memory Functions
@@ -449,7 +463,7 @@ void get_tree_path(params *pars, int size) {
 
     size = get_full_byte_size(size);
     path = memory_allocator(sizeof(u_char), size + 1);
-    k    = get(pars->root);
+    k    = get_tree_size(pars->root);
     vec  = get_array(pars->root, vec, k);
     l    = 0;
 
@@ -479,7 +493,7 @@ void get_tree_path(params *pars, int size) {
     pars->tree_path = path;
 }
 
-int get(Node *root) {
+int get_tree_size(Node *root) {
 
     int result = 0;
 
@@ -488,8 +502,8 @@ int get(Node *root) {
     else
         return result;
 
-    result += get(root->left);
-    result += get(root->right);
+    result += get_tree_size(root->left);
+    result += get_tree_size(root->right);
 
     return result;
 }
@@ -497,7 +511,7 @@ int get(Node *root) {
 int get_tree_length(Node *root, int size) {
 
     int result;
-    result  = get(root);
+    result  = get_tree_size(root);
     result += size * 8;
     return result;
 }
@@ -534,7 +548,10 @@ int main(void) {
 
     compressed_file_creation("#", 1, "ab");
 
-    memset(bytes, 0, byte_length);
+    free(bytes);
+    byte_length = get_length_in_bytes(path_length);
+    bytes = memory_allocator(sizeof(u_char), byte_length);
+
     byte_length = get_length_in_bytes(path_length);
     get_full_bytes(bytes, pars->chr_path, path_length);
     compressed_file_creation(bytes, byte_length, "ab");
