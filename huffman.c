@@ -23,9 +23,14 @@
 #define memory_alloc(name, var_a, var_b)            \
     memory_allocator(#name, __func__, var_a, var_b)
 
-typedef unsigned char u_char;
-typedef const char    C_C;
-typedef struct Node   Node;
+typedef unsigned char        u_char;
+typedef const char           C_C;
+
+typedef struct Node                  Node;
+typedef struct value_arrays          value_arrays;
+typedef struct path_holder_arrays    path_holder_arrays;
+typedef struct length_holder         length_holder;
+typedef struct file_operation_arrays file_operation_arrays;
 
 //==============================================
 // Structures
@@ -38,14 +43,33 @@ struct Node {
     Node  *left, *right, *parent;
 };
 
-typedef struct {
+struct file_operation_arrays {
+
+    u_char *input_array, *output_array;
+    int     input_size, output_size;
+};
+
+struct value_arrays {
+
+    u_char *unique_input_data_array;
+    int    *input_frequency_array;
+    int     array_size;
+};
+
+struct path_holder_arrays {
 
     u_char **path;
-    u_char  *chrs, *tree_path, *chr_path;
-    Node    *root;
-    int     *vals;
+    u_char  *tree_path, *char_path;
+};
 
-} params;
+struct length_holder {
+
+    int input_data_size,
+        tree_path_length,
+        char_path_length,
+        compressed_tree_path_length,
+        compressed_char_path_length;
+};
 
 //===========================================
 // Forward declaratoins
@@ -53,25 +77,30 @@ typedef struct {
 
 // Memory allocation and Free functions
 
-void *memory_allocator(int dt_size, int size);
+void *memory_allocator(C_C *var_name, C_C *func_name, int data_type, int size);
 void  free_tree(Node *root);
+
+// Error Handling
+ 
+void handle_func_failure(void *ptr, C_C *fail_func, C_C *var_name,
+                         C_C *scope_func);
 
 // Tree and Dictionary operations
 
 Node *new_node(void);
 Node *node_assign(Node *node, int val, char chr);
-Node *create_subtree(Node *left, Node *right, params *pars, int *min);
-Node *construct_tree(params *pars, int size);
+Node *create_subtree(Node *left, Node *right, parameters *pars, int *min);
+Node *construct_tree(parameters *pars, int size);
 Node *find_node(Node *root, char target);
 void  get_path(Node *curr, char target, u_char *path);
-void  get_dictionary(params *pars, u_char *input_data, int size);
+void  get_dictionary(parameters *pars, u_char *input_data, int size);
 int   get_tree_size(Node *root);
 
 // Data Processing
 
-u_char *file_process(void);
+void    file_process(file_operation_arrays file_arrs);
 void    compressed_file_creation(void *bytes, int byte_length, char *mode);
-void    get_unique_vals(u_char *input, params *pars, int size);
+void    get_unique_vals(u_char *input, parameters *pars, int size);
 int     get_min_vals(int *arr, int val, int size);
 int     get_value(u_char *arr, u_char target, int size);
 int     get_unique_size(u_char *input);
@@ -84,17 +113,12 @@ int     get_length_in_bytes(int length);
 // Memory Functions
 // =========================================
 
-void *memory_allocator(int dt_size, int size) {
+void *memory_allocator(C_C *var_name, C_C *func_name, int data_type, int size) {
 
-    void *temp = malloc(dt_size * size);
-
-    if (temp == NULL) {
-        printf("Malloc Failed \n");
-        exit(1);
-    }
-
-    memset(temp, 0, dt_size * size);
-    return temp;
+    void *memory = malloc(data_type * size);
+    handle_failure(memory, GFN(malloc));
+    memset(memory, '\0', data_type * size);
+    return memory;
 }
 
 void free_tree(Node *root) {
@@ -107,11 +131,29 @@ void free_tree(Node *root) {
     free(root);
 }
 
+//=========================================
+// Error Handling
+//=========================================
+
+void handle_func_failure(void *ptr, C_C *fail_func, C_C *var_name,
+                         C_C *scope_func) {
+
+    if (ptr == NULL) {
+        printf(
+            "ERROR : In \"%s\" function "
+            "\"%s\" function Failed "
+            "for the variable \"%s\" \n",
+            scope_func, fail_func, var_name);
+        exit(1);
+    }
+}
+
+
 // ===========================================
 // File and Data Processing
 // ===========================================
 
-u_char *file_process(void) {
+void file_process(file_operation_arrays file_arrs) {
 
     int     size;
     u_char *input;
@@ -124,16 +166,21 @@ u_char *file_process(void) {
     fseek(ptr, 0L, SEEK_END);
     size = ftell(ptr);
 
-    while (size == -1)
+    while (size == -1) {
+        printf("Function \"ftell\" is failing, retyring...\n");
         size = ftell(ptr);
+    }
 
     fseek(ptr, 0L, SEEK_SET);
-    input = malloc(size + 1);
+    input = memory_alloc(input, sizeof(u_char), size + 1);
     fread(input, 1, size, ptr);
     input[size - 1] = '\0';
+    printf("size - 1 for input : %c\n", input[size - 2]);
 
     fclose(ptr);
-    return input;
+    
+    file_arrs.input_array = input;
+    file_arrs.input_size  = size;
 }
 
 void compressed_file_creation(void *bytes, int byte_length, char *mode) {
@@ -200,7 +247,7 @@ int get_value(u_char *arr, u_char target, int size) {
     return -1;
 }
 
-void get_unique_vals(u_char *input, params *pars, int size) {
+void get_unique_vals(u_char *input, parameters *pars, int size) {
 
     int index, length;
     length = 0;
@@ -305,7 +352,7 @@ Node *node_assign(Node *node, int val, char chr) {
     return node;
 }
 
-Node *create_subtree(Node *left, Node *right, params *pars, int *min) {
+Node *create_subtree(Node *left, Node *right, parameters *pars, int *min) {
 
     Node *root;
 
@@ -321,7 +368,7 @@ Node *create_subtree(Node *left, Node *right, params *pars, int *min) {
     return root;
 }
 
-Node *construct_tree(params *pars, int size) {
+Node *construct_tree(parameters *pars, int size) {
 
     Node **nods;
     Node  *left, *right, *root;
@@ -403,7 +450,7 @@ void reverse_path(u_char *path, int size) {
     }
 }
 
-void get_dictionary(params *pars, u_char *input_data, int size) {
+void get_dictionary(parameters *pars, u_char *input_data, int size) {
 
     u_char *chrs = input_data;
     pars->path   = memory_allocator(sizeof(u_char *), size);
@@ -429,7 +476,7 @@ Node *get_array(Node *root, Node *vec, int size) {
     return vec;
 }
 
-void get_full_path(params *pars, int size) {
+void get_full_path(parameters *pars, int size) {
 
     u_char *par = memory_allocator(sizeof(u_char), size + 1);
     int     k   = 0;
@@ -455,7 +502,7 @@ void get_full_path(params *pars, int size) {
 
 int  get_full_byte_size(int size) { return size + 8 - (size % 8); }
 
-void get_tree_path(params *pars, int size) {
+void get_tree_path(parameters *pars, int size) {
 
     int     l, k;
     u_char *path, temp;
@@ -522,21 +569,25 @@ int get_tree_length(Node *root, int size) {
 
 int main(void) {
 
-    params *pars;
-    u_char *input_data, *bytes;
-    int     uni_val_size, size;
-    int     path_length, tree_length, byte_length;
+    value_arrays          value_arrs;
+    path_holder_arrays    path_arrs;
+    length_holder         length_strcut;
+    file_operation_arrays file_arrs;
 
-    input_data   = file_process();
-    uni_val_size = get_unique_size(input_data);
+    {
+        file_process(file_arrs);
+        unique_value_count = get_unique_size(input_data);
 
-    pars = memory_allocator(sizeof(params), 1);
-    get_unique_vals(input_data, pars, uni_val_size);
-    pars->root = construct_tree(pars, uni_val_size);
-    size       = get_size(input_data);
-    get_dictionary(pars, input_data, size);
+        pars = memory_allocator(sizeof(parameters), 1);
+        get_unique_vals(input_data, pars, unique_value_count);
+        pars->root = construct_tree(pars, unique_value_count);
+        size       = get_size(input_data);
+        get_dictionary(pars, input_data, size);
+        free(input_data);
+        input_data = NULL;
+    }
 
-    tree_length = get_tree_length(pars->root, uni_val_size);
+    tree_length = get_tree_length(pars->root, unique_value_count);
     path_length = get_path_length(pars->path, size);
     byte_length = get_length_in_bytes(tree_length);
     get_tree_path(pars, tree_length);
@@ -550,7 +601,7 @@ int main(void) {
 
     free(bytes);
     byte_length = get_length_in_bytes(path_length);
-    bytes = memory_allocator(sizeof(u_char), byte_length);
+    bytes       = memory_allocator(sizeof(u_char), byte_length);
 
     byte_length = get_length_in_bytes(path_length);
     get_full_bytes(bytes, pars->chr_path, path_length);

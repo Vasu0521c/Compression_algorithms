@@ -22,6 +22,7 @@
 typedef unsigned char u_char;
 typedef const char    C_C;
 typedef struct Node   Node;
+typedef struct size   size;
 
 //================================//
 // Structures
@@ -33,6 +34,12 @@ struct Node {
     _Bool  visited;
     Node  *left, *right;
     Node  *parent;
+};
+
+struct size {
+
+    u_char *bytes;
+    int     size;
 };
 
 //================================//
@@ -412,9 +419,10 @@ u_char *get_extracted_values(u_char *paths, Node **nodes, u_char **path,
     value  = 0;
     m_p_s  = *size;
     sep    = get_actual_value(paths);
-    length = (*size);
-    *size  = sep + get_sizeof_string(&(paths[sep]));
-    bytes  = memory_alloc(bytes, sizeof(u_char), length + 1);
+    length = get_sizeof_string(&paths[sep]);
+    length = length * 8;
+    *size  = get_sizeof_string(paths);
+    bytes  = memory_alloc(bytes, sizeof(u_char), length + 1000);
 
     for (int i = sep; i < (*size);) {
         index         = get_value(paths, path, i, m_p_s);
